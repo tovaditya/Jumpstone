@@ -1,6 +1,6 @@
-4/19/17
+4/21/17
 /*
-Peter Cardenas
+Peter Cardenas, Alex Huang, and Adity
 Computer Science I
 Start: 4..2017
 End: ..2017
@@ -16,46 +16,71 @@ Jumpstone: Hearthstone with Mario Characters
 #include <cmath>
 using namespace std;
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode);
+void stats(int ID);
+void setRarity(int ID);
+void setName(int ID);
+void setAttack(int ID);
+void setDefense(int ID);
+void setManaCost(int ID);
+void ability(int ID);
+void playCard(int ID);
+void drawCard();
+void render(int ID);
+void attacking(int attackerID, int attackeeID);
 struct Card {
 	int attack;
 	int defense;
 	int cost;
+	bool isMinion;
 	int ID;
+	string rarity;
 	string name;
-};
+}c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32, c33, c34, c35, c36, c37, c38, c39, c40, 
+c41, c42, c43, c44, c45, c46, c47, c48, c49, c50, c51, c52, c53, c54, c55, c56, c57, c58, c59, c60, c61, c62, c63, c64, c65, c66, c67, c68, c69, c70, c71, c72, c73, c74, c75, c76, c77, c78, c79, c80,
+c81, c82, c83, c84, c85;
 void main() {
-
+	srand((unsigned int)time(NULL));
 	system("pause");
 	return;
 }
 void stats(int ID) {
-	setAttack();
-	setDefense();
-	setManaCost();
+	setAttack(ID);
+	setDefense(ID);
+	setManaCost(ID);
+	setName(ID);
 }
-void setAttack() {
+void setRarity(int ID) {
 
 }
-void setDefense() {
+void setName(int ID) {
 
 }
-void setManaCost() {
+void setAttack(int ID) {
 
 }
-void ability() {
+void setDefense(int ID) {
+
+}
+void setManaCost(int ID) {
+
+}
+void ability(int ID) {
 
 }
 void playCard(int ID){
-	stats();
-	render();
+	stats(ID);
+	render(ID);
 }
 void drawCard() {
+	
+}
+void render(int ID) {
 
 }
-void render() {
-
-}
-void attacking(){
+void attacking(int attackerID, int attackeeID){
+	/*
+	hero attack value is first set to zero
+	*/
 
 }
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode) {
@@ -70,4 +95,3 @@ void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode) {
 		cout << "Error:" << ErrorCode;
 	}
 }
-
