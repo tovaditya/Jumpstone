@@ -1,0 +1,73 @@
+4/19/17
+/*
+Peter Cardenas
+Computer Science I
+Start: 4..2017
+End: ..2017
+Jumpstone: Hearthstone with Mario Characters
+*/
+#include <iostream>
+#include <string>
+#include <graphics.h>
+#include <ctime>
+#include <winbgi.cpp>
+#include <string>
+#include <Windows.h>
+#include <cmath>
+using namespace std;
+void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode);
+struct Card {
+	int attack;
+	int defense;
+	int cost;
+	int ID;
+	string name;
+};
+void main() {
+
+	system("pause");
+	return;
+}
+void stats(int ID) {
+	setAttack();
+	setDefense();
+	setManaCost();
+}
+void setAttack() {
+
+}
+void setDefense() {
+
+}
+void setManaCost() {
+
+}
+void ability() {
+
+}
+void playCard(int ID){
+	stats();
+	render();
+}
+void drawCard() {
+
+}
+void render() {
+
+}
+void attacking(){
+
+}
+void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode) {
+	//set the graphics driver
+	GrDriver = VGA; //800x600 by monitor
+	GrMode = VGAMAX;//set graphics mode
+	initgraph(&GrDriver, &GrMode, "");//start graphics
+									  //check for problems
+	ErrorCode = graphresult();
+	if (ErrorCode != grOk)
+	{
+		cout << "Error:" << ErrorCode;
+	}
+}
+
