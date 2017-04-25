@@ -1,4 +1,4 @@
-4/21/17
+4/25/17
 /*
 Peter Cardenas, Alex Huang, and Adity
 Computer Science I
@@ -27,17 +27,42 @@ void playCard(int ID);
 void drawCard();
 void render(int ID);
 void attacking(int attackerID, int attackeeID);
-struct Card {
-	int attack;
-	int defense;
-	int cost;
-	bool isMinion;
-	int ID;
-	string rarity;
-	string name;
-}c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32, c33, c34, c35, c36, c37, c38, c39, c40, 
-c41, c42, c43, c44, c45, c46, c47, c48, c49, c50, c51, c52, c53, c54, c55, c56, c57, c58, c59, c60, c61, c62, c63, c64, c65, c66, c67, c68, c69, c70, c71, c72, c73, c74, c75, c76, c77, c78, c79, c80,
-c81, c82, c83, c84, c85;
+struct Deck {
+	int ID[30];
+	void createDeck() {
+		bool isDup[66];
+		for (int i = 0; i < 66; i++) {
+			isDup[i] = false;
+		}
+		ID[0] = 3;
+		ID[1] = 5;
+		ID[2] = 8;
+		ID[3] = 11;
+		ID[4] = 16;
+		ID[5] = 29;
+		ID[6] = 35;
+		ID[7] = 43;
+		ID[8] = 54;
+		ID[9] = 59;
+		ID[10] = 20;
+		ID[11] = 4;
+		ID[12] = 42;
+		ID[13] = 44;
+		ID[14] = 56;
+		for (int i = 15; i < 30; i++) {
+			ID[i] = rand() % 66 + 1;
+			for (int j = 0; j < i; j++) {
+				if (isDup[ID[i]] == true) {
+					j = i;
+					i--;
+				}
+				else if (ID[i] == ID[j]) {
+					isDup[ID[i]] = true;
+				}
+			}
+		}
+	}
+}OpponentDeck,UserDeck;
 void main() {
 	srand((unsigned int)time(NULL));
 	system("pause");
@@ -81,7 +106,7 @@ void attacking(int attackerID, int attackeeID){
 	/*
 	hero attack value is first set to zero
 	*/
-
+	
 }
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode) {
 	//set the graphics driver
