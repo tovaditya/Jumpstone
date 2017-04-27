@@ -1,4 +1,4 @@
-4/25/17
+4/27/2017
 /*
 Peter Cardenas, Alex Huang, and Adity
 Computer Science I
@@ -27,42 +27,57 @@ void playCard(int ID);
 void drawCard();
 void render(int ID);
 void attacking(int attackerID, int attackeeID);
-struct Deck {
-	int ID[30];
+struct Player {
+	int Deck[30];
+	int Hand[7];
+	int decideF;
+	bool isF;
+	void isFirst() {
+		decideF = rand() % 2 + 1;
+		if (decideF == 1) {
+			bool isF = true;
+		}
+		else {
+			bool isF = false;
+		}
+	}
 	void createDeck() {
 		bool isDup[66];
 		for (int i = 0; i < 66; i++) {
 			isDup[i] = false;
 		}
-		ID[0] = 3;
-		ID[1] = 5;
-		ID[2] = 8;
-		ID[3] = 11;
-		ID[4] = 16;
-		ID[5] = 29;
-		ID[6] = 35;
-		ID[7] = 43;
-		ID[8] = 54;
-		ID[9] = 59;
-		ID[10] = 20;
-		ID[11] = 4;
-		ID[12] = 42;
-		ID[13] = 44;
-		ID[14] = 56;
+		Deck[0] = 3;
+		Deck[1] = 5;
+		Deck[2] = 8;
+		Deck[3] = 11;
+		Deck[4] = 16;
+		Deck[5] = 29;
+		Deck[6] = 35;
+		Deck[7] = 43;
+		Deck[8] = 54;
+		Deck[9] = 59;
+		Deck[10] = 20;
+		Deck[11] = 4;
+		Deck[12] = 42;
+		Deck[13] = 44;
+		Deck[14] = 56;
 		for (int i = 15; i < 30; i++) {
-			ID[i] = rand() % 66 + 1;
+			Deck[i] = rand() % 66 + 1;
 			for (int j = 0; j < i; j++) {
-				if (isDup[ID[i]] == true) {
+				if (isDup[Deck[i]] == true) {
 					j = i;
 					i--;
 				}
-				else if (ID[i] == ID[j]) {
-					isDup[ID[i]] = true;
+				else if (Deck[i] == Deck[j]) {
+					isDup[Deck[i]] = true;
 				}
 			}
 		}
 	}
-}OpponentDeck,UserDeck;
+	void isDrawn(int ID) {
+		Deck[ID] = -1;
+	}
+}Opponent,User;
 void main() {
 	srand((unsigned int)time(NULL));
 	system("pause");
@@ -98,6 +113,82 @@ void playCard(int ID){
 }
 void drawCard() {
 	
+}
+void gameStart() {
+	Opponent.createDeck();
+	User.createDeck();
+}
+void matchStart() {
+	mulligan();
+}
+void decideFOS() {
+	User.isFirst();
+	if (User.isF) {
+		Opponent.isF = false;
+	}
+	else {
+		Opponent.isF = false;
+	}
+}
+void mulligan() {
+	//three cards each player, second player gets 2 coins
+	decideFOS();
+	int choice;
+	bool clickedRegion1;
+	bool clickedRegion2;
+	bool clickedRegion3;
+	bool mDone;
+	if (User.isF) {
+		for (int i = 0; i < 3; i++) {
+			choice = rand() % 30;
+			User.Hand[i] = User.Deck[choice];
+			User.isDrawn(choice);
+			choice = rand() % 30;
+			Opponent.Hand[i] = Opponent.Deck[choice];
+			Opponent.isDrawn(choice);
+		}
+		Opponent.Hand[3], Opponent.Hand[4] = 67;
+	}
+	else if(Opponent.isF) {
+		for (int i = 0; i < 3; i++) {
+			choice = rand() % 30;
+			User.Hand[i] = User.Deck[choice];
+			User.isDrawn(choice);
+			choice = rand() % 30;
+			Opponent.Hand[i] = Opponent.Deck[choice];
+			Opponent.isDrawn(choice);
+		}
+		User.Hand[3], User.Hand[4] = 67;
+	}
+	if (mDone) {
+		if (clickedRegion1) {
+			if (clickedRegion2) {
+				if (clickedRegion3) {
+
+				}
+				else {
+
+				}
+			}
+			else if (clickedRegion3) {
+
+			}
+		}
+		else if (clickedRegion2) {
+			if (clickedRegion3) {
+
+			}
+			else {
+
+			}
+		}
+		else if (clickedRegion3) {
+
+		}
+	}
+}
+void turn() {
+	drawCard();
 }
 void render(int ID) {
 
