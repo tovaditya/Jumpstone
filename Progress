@@ -1,4 +1,4 @@
-4/27/2017
+5/1/2017
 /*
 Peter Cardenas, Alex Huang, and Adity
 Computer Science I
@@ -27,6 +27,9 @@ void playCard(int ID);
 void drawCard();
 void render(int ID);
 void attacking(int attackerID, int attackeeID);
+struct Board {
+
+}UserB, OpponentB;
 struct Player {
 	int Deck[30];
 	int Hand[7];
@@ -74,6 +77,29 @@ struct Player {
 			}
 		}
 	}
+	void resetHand(int hand[]) {
+		int handSize = sizeof(Hand) / sizeof(Hand[0]);
+		for (int i = 0; i < handSize; i++) {
+			if (hand[i] == -1) {
+				for (int j = i; j < handSize; j++) {
+					if (j == handSize - 1) {}
+					else {
+						hand[j] = hand[j + 1];
+					}
+				}
+			}
+		}
+	}
+	int cardsInHand(int Hand[]) {
+		int handSize = sizeof(Hand) / sizeof(Hand[0]);
+		int count = 0;
+		for (int i = 0; i < handSize; i ++) {
+			if (Hand[i] > 0) {
+				count++;
+			}
+		}
+		return count;
+	}
 	void isDrawn(int ID) {
 		Deck[ID] = -1;
 	}
@@ -105,6 +131,9 @@ void setManaCost(int ID) {
 
 }
 void ability(int ID) {
+	if (ID == 1 || ID == 3 || ID == 5 || ID == 10 || ID == 68 || ID == 69 || ID == 70 || ID == 71 || ID == 72 || ID == 76 || ID == 81) {
+
+	}
 
 }
 void playCard(int ID){
@@ -134,16 +163,17 @@ void mulligan() {
 	//three cards each player, second player gets 2 coins
 	decideFOS();
 	int choice;
+	int deckSize = sizeof(User.Deck) / sizeof(User.Deck[0]);
 	bool clickedRegion1;
 	bool clickedRegion2;
 	bool clickedRegion3;
 	bool mDone;
 	if (User.isF) {
 		for (int i = 0; i < 3; i++) {
-			choice = rand() % 30;
+			choice = rand() % deckSize;
 			User.Hand[i] = User.Deck[choice];
 			User.isDrawn(choice);
-			choice = rand() % 30;
+			choice = rand() % deckSize;
 			Opponent.Hand[i] = Opponent.Deck[choice];
 			Opponent.isDrawn(choice);
 		}
@@ -151,10 +181,10 @@ void mulligan() {
 	}
 	else if(Opponent.isF) {
 		for (int i = 0; i < 3; i++) {
-			choice = rand() % 30;
+			choice = rand() % deckSize;
 			User.Hand[i] = User.Deck[choice];
 			User.isDrawn(choice);
-			choice = rand() % 30;
+			choice = rand() % deckSize;
 			Opponent.Hand[i] = Opponent.Deck[choice];
 			Opponent.isDrawn(choice);
 		}
@@ -162,28 +192,81 @@ void mulligan() {
 	}
 	if (mDone) {
 		if (clickedRegion1) {
-			if (clickedRegion2) {
-				if (clickedRegion3) {
-
+			while(User.Hand[0] != -1) {
+				int i = 0;
+				if (User.Deck[i] = -1) {
+					User.Deck[i] = User.Hand[0];
+					User.Hand[0] = -1;
 				}
-				else {
-
+				i++;
+			}
+			if (clickedRegion2) {
+				while (User.Hand[1] != -1) {
+					int i = 0;
+					if (User.Deck[i] = -1) {
+						User.Deck[i] = User.Hand[1];
+						User.Hand[1] = -1;
+					}
+					i++;
+				}
+				if (clickedRegion3) {
+					while (User.Hand[2] != -1) {
+						int i = 0;
+						if (User.Deck[i] = -1) {
+							User.Deck[i] = User.Hand[2];
+							User.Hand[2] = -1;
+						}
+						i++;
+					}
 				}
 			}
 			else if (clickedRegion3) {
-
+				while (User.Hand[2] != -1) {
+					int i = 0;
+					if (User.Deck[i] = -1) {
+						User.Deck[i] = User.Hand[2];
+						User.Hand[2] = -1;
+					}
+					i++;
+				}
 			}
 		}
 		else if (clickedRegion2) {
-			if (clickedRegion3) {
-
+			while (User.Hand[1] != -1) {
+				int i = 0;
+				if (User.Deck[i] = -1) {
+					User.Deck[i] = User.Hand[1];
+					User.Hand[1] = -1;
+				}
+				i++;
 			}
-			else {
-
+			if (clickedRegion3) {
+				while (User.Hand[2] != -1) {
+					int i = 0;
+					if (User.Deck[i] = -1) {
+						User.Deck[i] = User.Hand[2];
+						User.Hand[2] = -1;
+					}
+					i++;
+				}
 			}
 		}
 		else if (clickedRegion3) {
-
+			while (User.Hand[2] != -1) {
+				int i = 0;
+				if (User.Deck[i] = -1) {
+					User.Deck[i] = User.Hand[2];
+					User.Hand[2] = -1;
+				}
+				i++;
+			}
+		}
+		for (int i = 0; i < 3; i++) {
+			if (User.Hand[i] == -1) {
+				choice = rand() % deckSize;
+				User.Hand[i] = User.Deck[choice];
+				User.isDrawn(choice);
+			}
 		}
 	}
 }
