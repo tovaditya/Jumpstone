@@ -17,17 +17,19 @@ Jumpstone: Hearthstone with Mario Characters
 using namespace std;
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode);
 void stats(int ID);
-void setRarity(int ID);
-void setName(int ID);
-void setAttack(int ID);
-void setDefense(int ID);
-void setManaCost(int ID);
+string setName(int ID);
+int setAttack(int ID);
+int setDefense(int ID);
+int setManaCost(int ID);
 void ability(int ID);
 void playCard(int ID);
 void drawCard();
 void render(int ID);
 void attacking(int attackerID, int attackeeID);
+void mulligan();
+void drawBoard();
 struct Board {
+	int board[7];
 
 }UserB, OpponentB;
 struct Player {
@@ -45,27 +47,27 @@ struct Player {
 		}
 	}
 	void createDeck() {
-		bool isDup[66];
-		for (int i = 0; i < 66; i++) {
+		bool isDup[65];
+		for (int i = 0; i < 65; i++) {
 			isDup[i] = false;
 		}
 		Deck[0] = 3;
-		Deck[1] = 5;
-		Deck[2] = 8;
-		Deck[3] = 11;
-		Deck[4] = 16;
-		Deck[5] = 29;
-		Deck[6] = 35;
-		Deck[7] = 43;
-		Deck[8] = 54;
-		Deck[9] = 59;
-		Deck[10] = 20;
-		Deck[11] = 4;
-		Deck[12] = 42;
-		Deck[13] = 44;
-		Deck[14] = 56;
+		Deck[1] = 4;
+		Deck[2] = 5;
+		Deck[3] = 8;
+		Deck[4] = 11;
+		Deck[5] = 16;
+		Deck[6] = 20;
+		Deck[7] = 28;
+		Deck[8] = 34;
+		Deck[9] = 41;
+		Deck[10] = 42;
+		Deck[11] = 43;
+		Deck[12] = 53;
+		Deck[13] = 55;
+		Deck[14] = 58;
 		for (int i = 15; i < 30; i++) {
-			Deck[i] = rand() % 66 + 1;
+			Deck[i] = rand() % 65 + 1;
 			for (int j = 0; j < i; j++) {
 				if (isDup[Deck[i]] == true) {
 					j = i;
@@ -115,26 +117,155 @@ void stats(int ID) {
 	setManaCost(ID);
 	setName(ID);
 }
-void setRarity(int ID) {
+void drawBoard() {
+	//rect 1: full rectangle
+	int top1 = 0;
+	int left1 = 0;
+	int right1 = 1919;
+	int bottom1 = 1017;
+	setcolor(WHITE);
+	bar(top1, left1, right1, bottom1);
+	setcolor(BLACK);
+	//rect 2: middle of board
+	int top2 = 0;
+	int left2 = 289;
+	int right2 = 1919;
+	int bottom2 = 728;
+	rectangle(top2, left2, right2, bottom2);
+	setcolor(RED);
 
+	//ellipse idek anymore: end turn button
+	int X = 1859;
+	int Y = 509;
+	int Xr = 60;
+	int Yr = 40;
+	ellipse(X, Y, 0, 360, 62, 42);
+
+	ellipse(X, Y, 0, 360, Xr, Yr);
+
+	fillellipse(X, Y, Xr, Yr);
+
+	setcolor(0);
+	// add asthetics to rect 2
+
+	//rect 3: player 1/2 board
+	int t3 = 0;
+	int l3 = 0;
+	int r3 = 1919;
+	int b3 = 289;
+	rectangle(t3, l3, r3, b3);
+
+	//rect 4: player 1/2 board
+	int t4 = 0;
+	int l4 = 728;
+	int r4 = 1919;
+	int b4 = 1017;
+	rectangle(t4, l4, r4, b4);
+
+	//rect 5: hand
+	int l5 = 36;
+	int t5 = 30;
+	int r5 = 228;
+	int b5 = 276;
+	rectangle(l5, t5, r5, b5);
+	rectangle(l5 + 1, t5 + 1, r5 + 1, b5 + 1);
+	rectangle(l5 + 2, t5 + 2, r5 + 2, b5 + 2);
+
+	//rect 6: hand
+	rectangle(l5 + 228, t5, r5 + 228, b5);
+	rectangle(l5 + 229, t5 + 1, r5 + 229, b5 + 1);
+	rectangle(l5 + 230, t5 + 2, r5 + 230, b5 + 2);
+
+	//rect 7: hand
+	rectangle(l5 + 456, t5, r5 + 456, b5);
+	rectangle(l5 + 457, t5 + 1, r5 + 457, b5 + 1);
+	rectangle(l5 + 458, t5 + 2, r5 + 459, b5 + 2);
+
+	//rect 8: hand
+	rectangle(l5 + 684, t5, r5 + 684, b5);
+	rectangle(l5 + 685, t5 + 1, r5 + 685, b5 + 1);
+	rectangle(l5 + 686, t5 + 2, r5 + 686, b5 + 2);
+
+	//rect 9: hand
+	rectangle(l5 + 912, t5, r5 + 912, b5);
+	rectangle(l5 + 913, t5 + 1, r5 + 913, b5 + 1);
+	rectangle(l5 + 914, t5 + 2, r5 + 914, b5 + 2);
+
+	//rect 10: hand
+	rectangle(l5 + 1140, t5, r5 + 1140, b5);
+	rectangle(l5 + 1141, t5 + 1, r5 + 1141, b5 + 1);
+	rectangle(l5 + 1142, t5 + 2, r5 + 1142, b5 + 2);
+
+	//rect 11: hand
+	rectangle(l5 + 1368, t5, r5 + 1368, b5);
+	rectangle(l5 + 1369, t5 + 1, r5 + 1369, b5 + 1);
+	rectangle(l5 + 1370, t5 + 2, r5 + 1370, b5 + 2);
+
+	//rect 18: Hand
+	int l18 = 36;
+	int t18 = 738;
+	int r18 = 228;
+	int b18 = 997;
+	rectangle(l18, t18, r18, b18);
+	rectangle(l18 + 1, t18 + 1, r18 + 1, b18 + 1);
+	rectangle(l18 + 2, t18 + 2, r18 + 2, b18 + 2);
+	//rect 19: hand
+	rectangle(l18 + 228, t18, r18 + 228, b18);
+	rectangle(l18 + 229, t18 + 1, r18 + 229, b18 + 1);
+	rectangle(l18 + 230, t18 + 2, r18 + 230, b18 + 2);
+
+	//rect 20: hand
+	rectangle(l18 + 456, t18, r18 + 456, b18);
+	rectangle(l18 + 457, t18 + 1, r18 + 457, b18 + 1);
+	rectangle(l18 + 458, t18 + 2, r18 + 458, b18 + 2);
+
+	//rect 21: hand
+	rectangle(l18 + 684, t18, r18 + 684, b18);
+	rectangle(l18 + 685, t18 + 1, r18 + 685, b18 + 1);
+	rectangle(l18 + 686, t18 + 2, r18 + 686, b18 + 2);
+
+	//rect 22: hand
+	rectangle(l18 + 912, t18, r18 + 912, b18);
+	rectangle(l18 + 913, t18 + 1, r18 + 913, b18 + 1);
+	rectangle(l18 + 914, t18 + 2, r18 + 914, b18 + 1);
+
+	//rect 23: hand
+	rectangle(l18 + 1140, t18, r18 + 1140, b18);
+	rectangle(l18 + 1141, t18 + 1, r18 + 1141, b18 + 1);
+	rectangle(l18 + 1142, t18 + 2, r18 + 1142, b18 + 2);
+
+	//rect 24: hand 
+	rectangle(l18 + 1368, t18, r18 + 1368, b18);
+	rectangle(l18 + 1369, t18 + 1, r18 + 1369, b18 + 1);
+	rectangle(l18 + 1370, t18 + 2, r18 + 1370, b18 + 2);
 }
-void setName(int ID) {
-
+string setName(int ID) {
+	string names[84] = { "Micro Goomba","Block", "Goomba", "Shy Guy", "Toad", "Bill Blaster", "Fuzzy", "Luma", "Rocky Wrench", "Cheep Cheep", "Green Koopa", "Paragoomba", "Pipe Piranha Plant", 
+		"Toadsworth", "Yoshi Egg", "Boo", "Bowser Jr.", "Bowser Statue", "Koopatrol", "Magikoopa", "Pokey", "Red Koopa", "Wiggler", "Boomerang Bro", "Captain Toad", "Dry Bones", "Fawful", 
+		"Goomba Tower", "Hammer Bro", "Lakitu", "Sledge Bro", "Toadette", "Cataquack", "Fire Bro",	"Antasma", "Goomba King", "Dry Bowser", "Honey Queen", "King Boo", "Fire Flower", "Hammer", 
+		"Super Mushroom", "1-up Mushroom", "Fused Bomb-omb", "Lightning", "Mario's Cap", "Super Star", "Whomp Plomp", "Castle",	"Dr. Mario Pills", "F.L.U.D.D.", "Metal Cap", "POW Block", 
+		"Wario's Bike", "? Block", "Damsel In Distress", "Thwomp Stomp",	"Blue Shell", "Fuzzy Madness", "Gotta Go Fast!", "Haunted Mansion", "Koopalings' Mischief",	"Mega Mushroom", "Lava Pool", 
+		"Wassup Bro!", "Coin", "Ball", "Bat", "Bullet Bill", "Lava Bubble", "Ring", "Spiny", "Green Shell", "Iggy", "Larry Koopa", "Lemmy Koopa", "Ludwig von Koopa", "Morton", "Roy Koopa", "War Toad", 
+		"Wendy O. Koopa", "Red Shell", "Sonic", "Yoshi"};
+	return names[ID - 1];
 }
-void setAttack(int ID) {
-
+int setAttack(int ID) {
+	int attackVals[84] = { 1, 0, 2, 1, 1, 0, 2, 1, 1, 4, 2, 2, 1, 3, 0, 5, 4, 1, 3, 3, 3, 3, 2, 5, 3, 2, 5, 5, 4, 3, 9, 4, 5, 6, 3, 6, 3, 1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+		-1,	-1,	-1,	-1, -1,	-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 2, 2, 1, 1, -1, 2, 2, 1, 1, 2, 2, 3, 1, -1, 6, 3 };
+	return attackVals[ID - 1];
 }
-void setDefense(int ID) {
-
+int setDefense(int ID) {
+	int defenseVals[84] = { 1, 4, 2, 2, 3, 5, 2, 2, 2, 2, 2, 4, 5, 3, 3, 3, 3, 7, 5, 4, 3, 4, 5, 5, 4, 1, 4, 5, 5, 5, 7, 5, 3, 5, 7, 6, 15, 8, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,	1, 1, 1, 1, 1, 1, -1, 2, 3, 2, 2, 3, 2, 1, 3, -1, 2, 4 };
+	return defenseVals[ID - 1];
 }
-void setManaCost(int ID) {
-
+int setManaCost(int ID) {
+	int costVals[84] = { 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 7, 7, 8, 8, 8, 1, 1, 2, 2, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 
+		6, 6, 6, 6, 8, 10, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 4, 4 };
+	return costVals[ID - 1];
 }
 void ability(int ID) {
-	if (ID == 1 || ID == 3 || ID == 5 || ID == 10 || ID == 68 || ID == 69 || ID == 70 || ID == 71 || ID == 72 || ID == 76 || ID == 81) {
-
-	}
-
+	
 }
 void playCard(int ID){
 	stats(ID);
@@ -177,7 +308,7 @@ void mulligan() {
 			Opponent.Hand[i] = Opponent.Deck[choice];
 			Opponent.isDrawn(choice);
 		}
-		Opponent.Hand[3], Opponent.Hand[4] = 67;
+		Opponent.Hand[3], Opponent.Hand[4] = 66;
 	}
 	else if(Opponent.isF) {
 		for (int i = 0; i < 3; i++) {
@@ -188,7 +319,7 @@ void mulligan() {
 			Opponent.Hand[i] = Opponent.Deck[choice];
 			Opponent.isDrawn(choice);
 		}
-		User.Hand[3], User.Hand[4] = 67;
+		User.Hand[3], User.Hand[4] = 66;
 	}
 	if (mDone) {
 		if (clickedRegion1) {
