@@ -1,0 +1,85 @@
+/*
+Peter Cardenas
+Problem 24
+Start: 1.26.2017
+End: ..2017
+
+*/
+#include <iostream>
+#include <string>
+#include <ctime>
+#include <chrono>
+#include <fstream>
+#include <cmath>
+using namespace std;
+using namespace chrono;
+#pragma region prototypes;
+void prime(int input);
+void openFile(string);
+void closeFile();
+void tick();
+#pragma endregion;
+#pragma region global variable;
+time_point<system_clock> start, stop;
+bool stopwatch = true;
+double timeElapsed;
+const int secondModifier = 1000;
+ofstream outfile;
+#pragma endregion;
+void main(){
+	tick();
+	prime(2);
+	tick();
+	cout << "seconds: "<< timeElapsed / secondModifier << '\n';
+	system("pause");
+	return;
+}
+void prime(int input) {
+	openFile("Primes.txt");
+	while (input < 4000000) {
+		bool isP = true;
+		if (input == 2 || input == 3 || input == 5) {
+			outfile << input << '\n';
+		}
+		else {
+			for (int i = 1; i < ceil(sqrt(input)) + 1; i += 2) {
+				if (i == 1) {}
+				else if (input % i == 0) {
+					isP = false;
+					i = (int)(ceil(sqrt(input))) + 1;
+				}
+			}
+			if (isP) {
+				outfile << input << '\n';
+			}
+		}
+		if (input == 2) {
+			input = 3;
+		}
+		else if (input == 3) {
+			input = 5;
+		}
+		else {
+			input += 2;
+		}
+	}
+	closeFile();
+	return;
+}
+void tick() {
+	if (stopwatch) {
+		start = system_clock::now();
+	}
+	else {
+		stop = system_clock::now();
+		timeElapsed = ((duration<double>(stop - start)).count()) * secondModifier;
+	}
+	stopwatch = !stopwatch;
+}
+void openFile(string file) {
+	closeFile();
+	outfile.open(file.c_str());
+}
+void closeFile() {
+	if (outfile.is_open()) { outfile.close(); }
+}
