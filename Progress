@@ -78,6 +78,7 @@ struct Player {
 	int Hand[7];
 	int decideF;
 	bool isF;
+	int turn = 0;
 	int setMana(int turn) {
 		int mana = (turn / 2) + (turn % 2);
 		return mana;
@@ -368,9 +369,11 @@ void decideFOS() {
 	User.isFirst();
 	if (User.isF) {
 		Opponent.isF = false;
+		User.turn = 1;
 	}
 	else {
-		Opponent.isF = false;
+		Opponent.isF = true;
+		Opponent.turn = 1;
 	}
 }
 void mulligan() {
@@ -486,6 +489,7 @@ void mulligan() {
 }
 void turn() {
 	drawCard();
+	
 }
 void render(int ID) {
 
