@@ -1,4 +1,4 @@
-5/1/2017
+5/5/2017
 /*
 Peter Cardenas, Alex Huang, and Adity
 Computer Science I
@@ -16,7 +16,6 @@ Jumpstone: Hearthstone with Mario Characters
 #include <cmath>
 using namespace std;
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode);
-void stats(int ID);
 string setName(int ID);
 int setAttack(int ID);
 int setDefense(int ID);
@@ -25,18 +24,64 @@ void ability(int ID);
 void playCard(int ID);
 void drawCard();
 void render(int ID);
-void attacking(int attackerID, int attackeeID);
+void attackMinion(UserBoard minion1, OpponentBoard minion2);
+void attackCharacter(Player hero, UserBoard minion1 = uC1, OpponentBoard minion2 = oC1);
 void mulligan();
 void drawBoard();
-struct Board {
-	int board[7];
-
-}UserB, OpponentB;
+struct UserBoard {
+	int ID;
+	int attack;
+	int defense;
+	bool isInPlay;
+	bool isAttacking;
+	void setIsAttacking(bool isAttacking) {
+		this->isAttacking = isAttacking;
+	}
+	void setIsInPlay(bool isInPlay) {
+		this->isInPlay = isInPlay;
+	}
+	void setID(int ID) {
+		this->ID = ID;
+	}
+	void setAttack(int attack) {
+		this->attack = attack;
+	}
+	void setDefense(int defense) {
+		this->defense = defense;
+	}
+}uC1, uC2, uC3, uC4, uC5, uC6, uC7;
+struct OpponentBoard {
+	int ID;
+	int attack;
+	int defense;
+	bool isInPlay;
+	bool isAttacking;
+	void setIsAttacking(bool isAttacking) {
+		this->isAttacking = isAttacking;
+	}
+	void setIsInPlay(bool isInPlay) {
+		this->isInPlay = isInPlay;
+	}
+	void setID(int ID) {
+		this->ID = ID;
+	}
+	void setAttack(int attack) {
+		this->attack = attack;
+	}
+	void setDefense(int defense) {
+		this->defense = defense;
+	}
+}oC1, oC2, oC3, oC4, oC5, oC6, oC7;
 struct Player {
+	int health = 30;
 	int Deck[30];
 	int Hand[7];
 	int decideF;
 	bool isF;
+	int setMana(int turn) {
+		int mana = (turn / 2) + (turn % 2);
+		return mana;
+	}
 	void isFirst() {
 		decideF = rand() % 2 + 1;
 		if (decideF == 1) {
@@ -110,12 +155,6 @@ void main() {
 	srand((unsigned int)time(NULL));
 	system("pause");
 	return;
-}
-void stats(int ID) {
-	setAttack(ID);
-	setDefense(ID);
-	setManaCost(ID);
-	setName(ID);
 }
 void drawBoard() {
 	//rect 1: full rectangle
@@ -268,17 +307,61 @@ void ability(int ID) {
 	
 }
 void playCard(int ID){
-	stats(ID);
-	render(ID);
+	if (!uC1.isInPlay) {
+		uC1.setID(ID);
+		uC1.setAttack(setAttack(ID));
+		uC1.setDefense(setDefense(ID));
+		uC1.isInPlay = true;
+	}
+	else if (!uC2.isInPlay) {
+		uC2.setID(ID);
+		uC2.setAttack(setAttack(ID));
+		uC2.setDefense(setDefense(ID));
+		uC2.isInPlay = true;
+	}
+	else if (!uC3.isInPlay) {
+		uC3.setID(ID);
+		uC3.setAttack(setAttack(ID));
+		uC3.setDefense(setDefense(ID));
+		uC3.isInPlay = true;
+	}
+	else if (!uC4.isInPlay) {
+		uC4.setID(ID);
+		uC4.setAttack(setAttack(ID));
+		uC4.setDefense(setDefense(ID));
+		uC4.isInPlay = true;
+	}
+	else if (!uC5.isInPlay) {
+		uC5.setID(ID);
+		uC5.setAttack(setAttack(ID));
+		uC5.setDefense(setDefense(ID));
+		uC5.isInPlay = true;
+	}
+	else if (!uC6.isInPlay) {
+		uC6.setID(ID);
+		uC6.setAttack(setAttack(ID));
+		uC6.setDefense(setDefense(ID));
+		uC6.isInPlay = true;
+	}
+	else if (!uC7.isInPlay) {
+		uC7.setID(ID);
+		uC7.setAttack(setAttack(ID));
+		uC7.setDefense(setDefense(ID));
+		uC7.isInPlay = true;
+	}
+	else {
+		//cannot play any minions
+	}
 }
 void drawCard() {
 	
 }
 void gameStart() {
-	Opponent.createDeck();
-	User.createDeck();
+	
 }
 void matchStart() {
+	Opponent.createDeck();
+	User.createDeck();
 	mulligan();
 }
 void decideFOS() {
@@ -407,11 +490,28 @@ void turn() {
 void render(int ID) {
 
 }
-void attacking(int attackerID, int attackeeID){
-	/*
-	hero attack value is first set to zero
-	*/
-	
+void attackCharacter(Player hero, UserBoard minion1 = uC1, OpponentBoard minion2 = oC1) {
+	if (minion1.isAttacking) {
+		hero.health -= minion1.attack;
+		minion1.setIsAttacking(false);
+	}
+	if (minion2.isAttacking) {
+		hero.health -= minion2.attack;
+		minion2.setIsAttacking(false);
+	}
+}
+void attackMinion(UserBoard minion1, OpponentBoard minion2){
+	//hero attack is 0
+	if (minion1.isAttacking) {
+		minion1.setDefense(minion1.defense - minion2.attack);
+		minion2.setDefense(minion2.defense - minion1.attack);
+		minion1.setIsAttacking(false);
+	}
+	else {
+		minion1.setDefense(minion1.defense - minion2.attack);
+		minion2.setDefense(minion2.defense - minion1.attack);
+		minion2.setIsAttacking(false);
+	}
 }
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode) {
 	//set the graphics driver
