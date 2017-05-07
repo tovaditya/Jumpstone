@@ -1,4 +1,4 @@
-5/5/2017
+5/7/2017
 /*
 Peter Cardenas, Alex Huang, and Adity
 Computer Science I
@@ -16,6 +16,7 @@ Jumpstone: Hearthstone with Mario Characters
 #include <cmath>
 using namespace std;
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode);
+#pragma region function prototypes
 string setName(int ID);
 int setAttack(int ID);
 int setDefense(int ID);
@@ -28,6 +29,7 @@ void attackMinion(UserBoard minion1, OpponentBoard minion2);
 void attackCharacter(Player hero, UserBoard minion1 = uC1, OpponentBoard minion2 = oC1);
 void mulligan();
 void drawBoard();
+#pragma endregion
 struct UserBoard {
 	int ID;
 	int attack;
@@ -79,9 +81,11 @@ struct Player {
 	int decideF;
 	bool isF;
 	int turn = 0;
-	int setMana(int turn) {
-		int mana = (turn / 2) + (turn % 2);
-		return mana;
+	int mana = 0;
+	int fatigueTurn = 0;
+	void setMana(int mana) {
+		this->mana = mana;
+		return;
 	}
 	void isFirst() {
 		decideF = rand() % 2 + 1;
@@ -141,17 +145,27 @@ struct Player {
 	int cardsInHand(int Hand[]) {
 		int handSize = sizeof(Hand) / sizeof(Hand[0]);
 		int count = 0;
-		for (int i = 0; i < handSize; i ++) {
+		for (int i = 0; i < handSize; i++) {
 			if (Hand[i] > 0) {
 				count++;
 			}
 		}
 		return count;
 	}
-	void isDrawn(int ID) {
-		Deck[ID] = -1;
+	int cardsinDeck(int Deck[]) {
+		int deckSize = sizeof(Deck) / sizeof(Deck[0]);
+		int count = 0;
+		for (int i = 0; i < deckSize; i++) {
+			if (Deck[i] > 0) {
+				count++;
+			}
+		}
+		return count;
 	}
-}Opponent,User;
+	void isDrawn(int location) {
+		Deck[location] = -1;
+	}
+}Opponent, User;
 void main() {
 	srand((unsigned int)time(NULL));
 	system("pause");
@@ -280,17 +294,17 @@ void drawBoard() {
 	rectangle(l18 + 1370, t18 + 2, r18 + 1370, b18 + 2);
 }
 string setName(int ID) {
-	string names[84] = { "Micro Goomba","Block", "Goomba", "Shy Guy", "Toad", "Bill Blaster", "Fuzzy", "Luma", "Rocky Wrench", "Cheep Cheep", "Green Koopa", "Paragoomba", "Pipe Piranha Plant", 
-		"Toadsworth", "Yoshi Egg", "Boo", "Bowser Jr.", "Bowser Statue", "Koopatrol", "Magikoopa", "Pokey", "Red Koopa", "Wiggler", "Boomerang Bro", "Captain Toad", "Dry Bones", "Fawful", 
-		"Goomba Tower", "Hammer Bro", "Lakitu", "Sledge Bro", "Toadette", "Cataquack", "Fire Bro",	"Antasma", "Goomba King", "Dry Bowser", "Honey Queen", "King Boo", "Fire Flower", "Hammer", 
-		"Super Mushroom", "1-up Mushroom", "Fused Bomb-omb", "Lightning", "Mario's Cap", "Super Star", "Whomp Plomp", "Castle",	"Dr. Mario Pills", "F.L.U.D.D.", "Metal Cap", "POW Block", 
-		"Wario's Bike", "? Block", "Damsel In Distress", "Thwomp Stomp",	"Blue Shell", "Fuzzy Madness", "Gotta Go Fast!", "Haunted Mansion", "Koopalings' Mischief",	"Mega Mushroom", "Lava Pool", 
-		"Wassup Bro!", "Coin", "Ball", "Bat", "Bullet Bill", "Lava Bubble", "Ring", "Spiny", "Green Shell", "Iggy", "Larry Koopa", "Lemmy Koopa", "Ludwig von Koopa", "Morton", "Roy Koopa", "War Toad", 
-		"Wendy O. Koopa", "Red Shell", "Sonic", "Yoshi"};
+	string names[84] = { "Micro Goomba","Block", "Goomba", "Shy Guy", "Toad", "Bill Blaster", "Fuzzy", "Luma", "Rocky Wrench", "Cheep Cheep", "Green Koopa", "Paragoomba", "Pipe Piranha Plant",
+		"Toadsworth", "Yoshi Egg", "Boo", "Bowser Jr.", "Bowser Statue", "Koopatrol", "Magikoopa", "Pokey", "Red Koopa", "Wiggler", "Boomerang Bro", "Captain Toad", "Dry Bones", "Fawful",
+		"Goomba Tower", "Hammer Bro", "Lakitu", "Sledge Bro", "Toadette", "Cataquack", "Fire Bro",	"Antasma", "Goomba King", "Dry Bowser", "Honey Queen", "King Boo", "Fire Flower", "Hammer",
+		"Super Mushroom", "1-up Mushroom", "Fused Bomb-omb", "Lightning", "Mario's Cap", "Super Star", "Whomp Plomp", "Castle",	"Dr. Mario Pills", "F.L.U.D.D.", "Metal Cap", "POW Block",
+		"Wario's Bike", "? Block", "Damsel In Distress", "Thwomp Stomp",	"Blue Shell", "Fuzzy Madness", "Gotta Go Fast!", "Haunted Mansion", "Koopalings' Mischief",	"Mega Mushroom", "Lava Pool",
+		"Wassup Bro!", "Coin", "Ball", "Bat", "Bullet Bill", "Lava Bubble", "Ring", "Spiny", "Green Shell", "Iggy", "Larry Koopa", "Lemmy Koopa", "Ludwig von Koopa", "Morton", "Roy Koopa", "War Toad",
+		"Wendy O. Koopa", "Red Shell", "Sonic", "Yoshi" };
 	return names[ID - 1];
 }
 int setAttack(int ID) {
-	int attackVals[84] = { 1, 0, 2, 1, 1, 0, 2, 1, 1, 4, 2, 2, 1, 3, 0, 5, 4, 1, 3, 3, 3, 3, 2, 5, 3, 2, 5, 5, 4, 3, 9, 4, 5, 6, 3, 6, 3, 1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+	int attackVals[84] = { 1, 0, 2, 1, 1, 0, 2, 1, 1, 4, 2, 2, 1, 3, 0, 5, 4, 1, 3, 3, 3, 3, 2, 5, 3, 2, 5, 5, 4, 3, 9, 4, 5, 6, 3, 6, 3, 1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		-1,	-1,	-1,	-1, -1,	-1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 2, 2, 1, 1, -1, 2, 2, 1, 1, 2, 2, 3, 1, -1, 6, 3 };
 	return attackVals[ID - 1];
 }
@@ -300,14 +314,103 @@ int setDefense(int ID) {
 	return defenseVals[ID - 1];
 }
 int setManaCost(int ID) {
-	int costVals[84] = { 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 7, 7, 8, 8, 8, 1, 1, 2, 2, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 
+	int costVals[84] = { 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 7, 7, 8, 8, 8, 1, 1, 2, 2, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5,
 		6, 6, 6, 6, 8, 10, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 4, 4 };
 	return costVals[ID - 1];
 }
-void ability(int ID) {
-	
+string setAbilityText(int ID) {
+	string abText[84] = { 
+		"",
+		"Taunt",
+		"",
+		"Run",
+		"",
+		"Spawn a 2 / 1 Bullet Bill at the end of each turn",
+		"When this attacks, restore 3 health to itself",
+		"Draw 1 card",
+		"When played, deal one damage",
+		"",
+		"When this dies, put a green shell to your hand",
+		"Double Jump",
+		"Taunt, Spiky 2"
+		"Summon a Toad"
+		"When this dies, summon a Yoshi"
+		"This card has Invincible the turn it is played",
+		"Summons 1 random Koopaling",
+		"Taunt Can't attack. At the end of your turn, deal 2 damage to a random enemy."
+		"Taunt When this dies, put a green shell to your hand",
+		"Deal 5 damage randomly accross all enemies",
+		"Spiky 1 When this dies, summon a copy of this which has - 1 / -1",
+		"When this dies, put a Red Shell into your hand",
+		"If this unit takes damage, gain 4 attack and Double Jump.",
+		"Deal 1 damage to two random minions at the end of your turn",
+		"Summon 2 War Toads",
+		"When this dies, summon a Dry Bones",
+		"Take control of an enemy minion that has 2 or less attack",
+		"When this dies, summon a copy of this which has - 2 / -2",
+		"Deal 2 damage",
+		"Each turn, summon a Spiny",
+		"Deal 5 damage.You can only play this card if you have played all Bros.",
+		"Restore 5 Health"
+		"Taunt Return a minion to its owner's hand",
+		"Deal 3 damage",
+		"Whenever this card takes damage, summon a bat",
+		"Add 2 / 2 to every Goomba on the board",
+		"Draw this card when Lava Pool is played.When played, replace your character with dry bowser.Summon two random Koopalings",
+		"Heal all characters to full health",
+		"Take control of a enemy minion",
+		"Give unit + 2 attack",
+		"Deal 2 damage",
+		"Give a unit + 3 health",
+		"Equip to a minion.When it dies, bring it back with half health",
+		"Select a character.Deal 8 damage to it next turn.",
+		"Set all minions to 1 health",
+		"Give a minion \"Summon a Luma at the beginning of your turn.\"",
+		"Give a minion Invincible for this turn only",
+		"Destroy a minion with 3 or less attack",
+		"Summon 1 random Koopaling and a Lava Bubble",
+		"Heal 5 to all friendly characters",
+		"Return an enemy minion to your opponent's hand",
+		"Give a minion + 5 health",
+		"Deal 2 damage to all minions",
+		"Give a minion Run",
+		"Cast a random Mario Power - up on a friendly minion",
+		"Give + 3 Health to Your Minions",
+		"Deal 5 damage",
+		"Destroy the opponent's strongest minion",
+		"Deal 2 damage all enemies and restore 2 health to all friendly characters",
+		"Summon Sonic",
+		"Return all minions to their owner's hand",
+		"Summons 3 random Koopalings",
+		"Give unit + 5 health, +7 attack",
+		"Destroy all minions",
+		"Summon 3 Bros.that have died this game",
+		"Give 1 more Mana this turn only",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"Spiky 1",
+		"Deal 4 damage randomly across all enemies",
+		"Deal 1 damage",
+		"",
+		"Summon two 1 / 1 Balls",
+		"Add a Fire Flower to your hand",
+		"Rage Give + 1 attack",
+		"Run",
+		"",
+		"Summon a 1 / 1 Ring",
+		"Deal 3 damage to a minion and 2 damage to the enemy character",
+		"Run Cannot be targeted by minions",
+		"Double Jump, Run" 
+	};
+	return abText[ID - 1];
 }
-void playCard(int ID){
+void ability(int ID) {
+
+}
+bool minionPlacement(int ID) {
 	if (!uC1.isInPlay) {
 		uC1.setID(ID);
 		uC1.setAttack(setAttack(ID));
@@ -351,14 +454,40 @@ void playCard(int ID){
 		uC7.isInPlay = true;
 	}
 	else {
-		//cannot play any minions
+		return false;
+	}
+	return true;
+}
+void playCard(int ID) {
+	//check if minion or spell
+}
+void drawCard(Player player) {
+	int deckSize = sizeof(player.Deck) / sizeof(player.Deck[0]);
+	int handSize = sizeof(player.Hand) / sizeof(player.Hand[0]);
+	int cardDrawn;
+	int location;
+	if (player.cardsinDeck(player.Deck) == 0) {
+		if (player.fatigueTurn == 0) {
+			player.fatigueTurn = player.turn;
+		}
+		player.health -= player.turn - (player.fatigueTurn - 1);
+	}
+	else {
+		do {
+			location = rand() % deckSize;
+			cardDrawn = player.Deck[location];
+		} while (cardDrawn == -1);
+		if (handSize == player.cardsInHand(player.Hand)) {
+			//burn card	
+		}
+		else {
+			player.Hand[player.cardsInHand(player.Hand)] = cardDrawn;
+		}
+		player.isDrawn(location);
 	}
 }
-void drawCard() {
-	
-}
 void gameStart() {
-	
+
 }
 void matchStart() {
 	Opponent.createDeck();
@@ -369,17 +498,16 @@ void decideFOS() {
 	User.isFirst();
 	if (User.isF) {
 		Opponent.isF = false;
-		User.turn = 1;
 	}
 	else {
 		Opponent.isF = true;
-		Opponent.turn = 1;
 	}
+	User.turn, Opponent.turn = 1;
 }
 void mulligan() {
 	//three cards each player, second player gets 2 coins
 	decideFOS();
-	int choice;
+	int location;
 	int deckSize = sizeof(User.Deck) / sizeof(User.Deck[0]);
 	bool clickedRegion1;
 	bool clickedRegion2;
@@ -387,29 +515,30 @@ void mulligan() {
 	bool mDone;
 	if (User.isF) {
 		for (int i = 0; i < 3; i++) {
-			choice = rand() % deckSize;
-			User.Hand[i] = User.Deck[choice];
-			User.isDrawn(choice);
-			choice = rand() % deckSize;
-			Opponent.Hand[i] = Opponent.Deck[choice];
-			Opponent.isDrawn(choice);
+			location = rand() % deckSize;
+			User.Hand[i] = User.Deck[location];
+			User.isDrawn(location);
+			location = rand() % deckSize;
+			Opponent.Hand[i] = Opponent.Deck[location];
+			Opponent.isDrawn(location);
 		}
 		Opponent.Hand[3], Opponent.Hand[4] = 66;
 	}
-	else if(Opponent.isF) {
+	else if (Opponent.isF) {
 		for (int i = 0; i < 3; i++) {
-			choice = rand() % deckSize;
-			User.Hand[i] = User.Deck[choice];
-			User.isDrawn(choice);
-			choice = rand() % deckSize;
-			Opponent.Hand[i] = Opponent.Deck[choice];
-			Opponent.isDrawn(choice);
+			location = rand() % deckSize;
+			User.Hand[i] = User.Deck[location];
+			User.isDrawn(location);
+			location = rand() % deckSize;
+			Opponent.Hand[i] = Opponent.Deck[location];
+			Opponent.isDrawn(location);
 		}
 		User.Hand[3], User.Hand[4] = 66;
 	}
+	//mulligan for user
 	if (mDone) {
 		if (clickedRegion1) {
-			while(User.Hand[0] != -1) {
+			while (User.Hand[0] != -1) {
 				int i = 0;
 				if (User.Deck[i] = -1) {
 					User.Deck[i] = User.Hand[0];
@@ -480,16 +609,35 @@ void mulligan() {
 		}
 		for (int i = 0; i < 3; i++) {
 			if (User.Hand[i] == -1) {
-				choice = rand() % deckSize;
-				User.Hand[i] = User.Deck[choice];
-				User.isDrawn(choice);
+				location = rand() % deckSize;
+				User.Hand[i] = User.Deck[location];
+				User.isDrawn(location);
 			}
 		}
 	}
+	//mulligan for computer (opponent)
 }
 void turn() {
-	drawCard();
-	
+	if (User.isF) {
+		if (User.turn == Opponent.turn) { // Do User 
+			drawCard(User);
+			User.setMana(++User.mana);
+		}
+		else if (User.turn > Opponent.turn) { // Do Opponent
+			drawCard(Opponent);
+			Opponent.setMana(++Opponent.mana);
+		}
+	}
+	else if (Opponent.isF) {
+		if (Opponent.turn == User.turn) { // Do Opponent 
+			drawCard(Opponent);
+			Opponent.setMana(++Opponent.mana);
+		}
+		else if (Opponent.turn > User.turn) { // Do User
+			drawCard(User);
+			User.setMana(++User.mana);
+		}
+	}
 }
 void render(int ID) {
 
@@ -504,7 +652,7 @@ void attackCharacter(Player hero, UserBoard minion1 = uC1, OpponentBoard minion2
 		minion2.setIsAttacking(false);
 	}
 }
-void attackMinion(UserBoard minion1, OpponentBoard minion2){
+void attackMinion(UserBoard minion1, OpponentBoard minion2) {
 	//hero attack is 0
 	if (minion1.isAttacking) {
 		minion1.setDefense(minion1.defense - minion2.attack);
