@@ -1,3 +1,4 @@
+5/9/17
 /*
 Peter Cardenas, Alex Huang, and Adity
 Computer Science I
@@ -16,6 +17,9 @@ Jumpstone: Hearthstone with Mario Characters
 using namespace std;
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode);
 #pragma region function prototypes
+struct Player;
+struct UserBoard;
+struct OpponentBoard;
 string setName(int ID);
 int setAttack(int ID);
 int setDefense(int ID);
@@ -26,7 +30,7 @@ void playCard(int ID, Player player);
 void drawCard(Player player);
 void render(int ID);
 void attackMinion(UserBoard minion1, OpponentBoard minion2);
-void attackCharacter(Player hero, UserBoard minion1 = uC1, OpponentBoard minion2 = oC1);
+void attackCharacter(Player hero, UserBoard & minion1 = defaultMinion, OpponentBoard & minion2 = defaultMinion2);
 void mulligan();
 void drawBoard();
 #pragma endregion
@@ -36,6 +40,10 @@ struct UserBoard {
 	int defense;
 	bool isInPlay;
 	bool isAttacking;
+	string abilityText;
+	void setAbilityText(string abilityText) {
+		this->abilityText = abilityText;
+	}
 	void setIsAttacking(bool isAttacking) {
 		this->isAttacking = isAttacking;
 	}
@@ -52,6 +60,7 @@ struct UserBoard {
 		this->defense = defense;
 	}
 }uC1, uC2, uC3, uC4, uC5, uC6, uC7;
+UserBoard defaultMinion;
 struct OpponentBoard {
 	int ID;
 	int attack;
@@ -59,6 +68,9 @@ struct OpponentBoard {
 	bool isInPlay;
 	bool isAttacking;
 	string abilityText;
+	void setAbilityText(string abilityText) {
+		this->abilityText = abilityText;
+	}
 	void setIsAttacking(bool isAttacking) {
 		this->isAttacking = isAttacking;
 	}
@@ -75,6 +87,7 @@ struct OpponentBoard {
 		this->defense = defense;
 	}
 }oC1, oC2, oC3, oC4, oC5, oC6, oC7;
+OpponentBoard defaultMinion2;
 struct Player {
 	bool isUser;
 	bool isOpponent;
@@ -420,7 +433,7 @@ void minionPlacement(int ID, Player player) {
 		uC1.setID(ID);
 		uC1.setAttack(setAttack(ID));
 		uC1.setDefense(setDefense(ID));
-		uC1.
+		
 		uC1.isInPlay = true;
 		player.boardFull = false;
 	}
@@ -663,7 +676,7 @@ void turn() {
 void render(int ID) {
 
 }
-void attackCharacter(Player hero, UserBoard minion1 = uC1, OpponentBoard minion2 = oC1) {
+void attackCharacter(Player hero, UserBoard & minion1 = defaultMinion, OpponentBoard & minion2 = defaultMinion2) {
 	if (minion1.isAttacking) {
 		hero.health -= minion1.attack;
 		minion1.setIsAttacking(false);
