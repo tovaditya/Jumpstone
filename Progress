@@ -621,21 +621,21 @@ void turn() {
 	if (User.isF) {
 		if (User.turn == Opponent.turn) { // Do User 
 			drawCard(User);
-			User.setMana(++User.mana);
+			User.setMana(User.turn);
 		}
 		else if (User.turn > Opponent.turn) { // Do Opponent
 			drawCard(Opponent);
-			Opponent.setMana(++Opponent.mana);
+			Opponent.setMana(Opponent.turn);
 		}
 	}
 	else if (Opponent.isF) {
 		if (Opponent.turn == User.turn) { // Do Opponent 
 			drawCard(Opponent);
-			Opponent.setMana(++Opponent.mana);
+			Opponent.setMana(Opponent.turn);
 		}
 		else if (Opponent.turn > User.turn) { // Do User
 			drawCard(User);
-			User.setMana(++User.mana);
+			User.setMana(User.turn);
 		}
 	}
 }
