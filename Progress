@@ -1,6 +1,6 @@
 5/9/17
 /*
-Peter Cardenas, Alex Huang, and Adity
+Peter Cardenas, Alex Huang, and Aditya (ASSART)
 Computer Science I
 Start: 4..2017
 End: ..2017
@@ -16,10 +16,11 @@ Jumpstone: Hearthstone with Mario Characters
 #include <cmath>
 using namespace std;
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode);
-#pragma region function prototypes
 struct Player;
 struct UserBoard;
 struct OpponentBoard;
+#pragma region function prototypes
+void castSpell(int ID, Player player)
 string setName(int ID);
 int setAttack(int ID);
 int setDefense(int ID);
@@ -425,72 +426,142 @@ string setAbilityText(int ID) {
 	};
 	return abText[ID - 1];
 }
-void ability(int ID, Player player) {
+void userAbility(UserBoard minion) {
 	
 }
+void opponentAbility(OpponentBoard minion){
+    
+}
+void castSpell(Player player){
+    
+}
 void minionPlacement(int ID, Player player) {
-	if (!uC1.isInPlay) {
-		uC1.setID(ID);
-		uC1.setAttack(setAttack(ID));
-		uC1.setDefense(setDefense(ID));
-		
-		uC1.isInPlay = true;
-		player.boardFull = false;
-	}
-	else if (!uC2.isInPlay) {
-		uC2.setID(ID);
-		uC2.setAttack(setAttack(ID));
-		uC2.setDefense(setDefense(ID));
-		uC2.isInPlay = true;
-		player.boardFull = false;
-	}
-	else if (!uC3.isInPlay) {
-		uC3.setID(ID);
-		uC3.setAttack(setAttack(ID));
-		uC3.setDefense(setDefense(ID));
-		uC3.isInPlay = true;
-		player.boardFull = false;
-	}
-	else if (!uC4.isInPlay) {
-		uC4.setID(ID);
-		uC4.setAttack(setAttack(ID));
-		uC4.setDefense(setDefense(ID));
-		uC4.isInPlay = true;
-		player.boardFull = false;
-	}
-	else if (!uC5.isInPlay) {
-		uC5.setID(ID);
-		uC5.setAttack(setAttack(ID));
-		uC5.setDefense(setDefense(ID));
-		uC5.isInPlay = true;
-		player.boardFull = false;
-	}
-	else if (!uC6.isInPlay) {
-		uC6.setID(ID);
-		uC6.setAttack(setAttack(ID));
-		uC6.setDefense(setDefense(ID));
-		uC6.isInPlay = true;
-		player.boardFull = false;
-	}
-	else if (!uC7.isInPlay) {
-		uC7.setID(ID);
-		uC7.setAttack(setAttack(ID));
-		uC7.setDefense(setDefense(ID));
-		uC7.isInPlay = true;
-		player.boardFull = false;
-	}
-	else {
-		player.boardFull = true;
-		return;
-	}
+    if(player.isUser){
+    	if (!uC1.isInPlay) {
+    		uC1.setID(ID);
+    		uC1.setAttack(setAttack(ID));
+    		uC1.setDefense(setDefense(ID));
+    		uC1.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!uC2.isInPlay) {
+    		uC2.setID(ID);
+    		uC2.setAttack(setAttack(ID));
+    		uC2.setDefense(setDefense(ID));
+    		uC2.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!uC3.isInPlay) {
+    		uC3.setID(ID);
+    		uC3.setAttack(setAttack(ID));
+    		uC3.setDefense(setDefense(ID));
+    		uC3.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!uC4.isInPlay) {
+    		uC4.setID(ID);
+    		uC4.setAttack(setAttack(ID));
+    		uC4.setDefense(setDefense(ID));
+    		uC4.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!uC5.isInPlay) {
+    		uC5.setID(ID);
+    		uC5.setAttack(setAttack(ID));
+    		uC5.setDefense(setDefense(ID));
+    		uC5.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!uC6.isInPlay) {
+    		uC6.setID(ID);
+    		uC6.setAttack(setAttack(ID));   
+    		uC6.setDefense(setDefense(ID));
+    		uC6.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!uC7.isInPlay) {
+    		uC7.setID(ID);
+    		uC7.setAttack(setAttack(ID));
+    		uC7.setDefense(setDefense(ID));
+    		uC7.isInPlay = true;
+    		player.boardFull = false;
+    	}
+	    else {
+	    	player.boardFull = true;
+    		return;
+	    }
+    }
+    else if (player.isOpponent){
+        if (!oC1.isInPlay) {
+    		oC1.setID(ID);
+    		oC1.setAttack(setAttack(ID));
+    		oC1.setDefense(setDefense(ID));
+    		oC1.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!oC2.isInPlay) {
+    		oC2.setID(ID);
+    		oC2.setAttack(setAttack(ID));
+    		oC2.setDefense(setDefense(ID));
+    		oC2.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!oC3.isInPlay) {
+    		oC3.setID(ID);
+    		oC3.setAttack(setAttack(ID));
+    		oC3.setDefense(setDefense(ID));
+    		oC3.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!oC4.isInPlay) {
+    		oC4.setID(ID);
+    		oC4.setAttack(setAttack(ID));
+    		oC4.setDefense(setDefense(ID));
+    		oC4.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!oC5.isInPlay) {
+    		oC5.setID(ID);
+    		oC5.setAttack(setAttack(ID));
+    		oC5.setDefense(setDefense(ID));
+    		oC5.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!oC6.isInPlay) {
+    		oC6.setID(ID);
+    		oC6.setAttack(setAttack(ID));   
+    		oC6.setDefense(setDefense(ID));
+    		oC6.isInPlay = true;
+    		player.boardFull = false;
+    	}
+    	else if (!oC7.isInPlay) {
+    		oC7.setID(ID);
+    		oC7.setAttack(setAttack(ID));
+    		oC7.setDefense(setDefense(ID));
+    		oC7.isInPlay = true;
+    		player.boardFull = false;
+    	}
+	    else {
+	    	player.boardFull = true;
+    		return;
+	    }
+    }
 }
 void playCard(int ID, Player player) {
 	if ((ID >= 1 && ID <= 39) || (ID >= 67 && ID <= 72) || (ID >= 74 && ID <= 81) || (ID >= 83 && ID <= 84)) {
 		minionPlacement(ID, player);
-		ability(ID, player);
+		if(player.boardFull){
+		    //say that it can't play minions
+		}
+		else if(player.isUser){
+		    userAbility(ID, UserBoard);
+		}
+		else if(player.isOpponent){
+		    opponentAbility( )
+		}
 	}
 	else if ((ID >= 40 && ID <= 65) || ID == 66 || ID == 73 || ID == 82) {
-
+        castSpell(ID, player);
 	}
 }
 void drawCard(Player player) {
