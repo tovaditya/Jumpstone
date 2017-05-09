@@ -1,6 +1,5 @@
-5/7/2017
 /*
-Peter Cardenas, Alex Huang, and Adit
+Peter Cardenas, Alex Huang, and Adity
 Computer Science I
 Start: 4..2017
 End: ..2017
@@ -21,9 +20,10 @@ string setName(int ID);
 int setAttack(int ID);
 int setDefense(int ID);
 int setManaCost(int ID);
-void ability(int ID);
-void playCard(int ID);
-void drawCard();
+void ability(int ID, Player player);
+void minionPlacement(int ID, Player player);
+void playCard(int ID, Player player);
+void drawCard(Player player);
 void render(int ID);
 void attackMinion(UserBoard minion1, OpponentBoard minion2);
 void attackCharacter(Player hero, UserBoard minion1 = uC1, OpponentBoard minion2 = oC1);
@@ -58,6 +58,7 @@ struct OpponentBoard {
 	int defense;
 	bool isInPlay;
 	bool isAttacking;
+	string abilityText;
 	void setIsAttacking(bool isAttacking) {
 		this->isAttacking = isAttacking;
 	}
@@ -75,6 +76,9 @@ struct OpponentBoard {
 	}
 }oC1, oC2, oC3, oC4, oC5, oC6, oC7;
 struct Player {
+	bool isUser;
+	bool isOpponent;
+	bool boardFull = false;
 	int health = 30;
 	int Deck[30];
 	int Hand[7];
@@ -172,6 +176,7 @@ void main() {
 	return;
 }
 void drawBoard() {
+	cleardevice();
 	//rect 1: full rectangle
 	int top1 = 0;
 	int left1 = 0;
@@ -319,7 +324,7 @@ int setManaCost(int ID) {
 	return costVals[ID - 1];
 }
 string setAbilityText(int ID) {
-	string abText[84] = { 
+	string abText[84] = {
 		"",
 		"Taunt",
 		"",
@@ -403,63 +408,77 @@ string setAbilityText(int ID) {
 		"Summon a 1 / 1 Ring",
 		"Deal 3 damage to a minion and 2 damage to the enemy character",
 		"Run Cannot be targeted by minions",
-		"Double Jump, Run" 
+		"Double Jump, Run"
 	};
 	return abText[ID - 1];
 }
-void ability(int ID) {
-
+void ability(int ID, Player player) {
+	
 }
-bool minionPlacement(int ID) {
+void minionPlacement(int ID, Player player) {
 	if (!uC1.isInPlay) {
 		uC1.setID(ID);
 		uC1.setAttack(setAttack(ID));
 		uC1.setDefense(setDefense(ID));
+		uC1.
 		uC1.isInPlay = true;
+		player.boardFull = false;
 	}
 	else if (!uC2.isInPlay) {
 		uC2.setID(ID);
 		uC2.setAttack(setAttack(ID));
 		uC2.setDefense(setDefense(ID));
 		uC2.isInPlay = true;
+		player.boardFull = false;
 	}
 	else if (!uC3.isInPlay) {
 		uC3.setID(ID);
 		uC3.setAttack(setAttack(ID));
 		uC3.setDefense(setDefense(ID));
 		uC3.isInPlay = true;
+		player.boardFull = false;
 	}
 	else if (!uC4.isInPlay) {
 		uC4.setID(ID);
 		uC4.setAttack(setAttack(ID));
 		uC4.setDefense(setDefense(ID));
 		uC4.isInPlay = true;
+		player.boardFull = false;
 	}
 	else if (!uC5.isInPlay) {
 		uC5.setID(ID);
 		uC5.setAttack(setAttack(ID));
 		uC5.setDefense(setDefense(ID));
 		uC5.isInPlay = true;
+		player.boardFull = false;
 	}
 	else if (!uC6.isInPlay) {
 		uC6.setID(ID);
 		uC6.setAttack(setAttack(ID));
 		uC6.setDefense(setDefense(ID));
 		uC6.isInPlay = true;
+		player.boardFull = false;
 	}
 	else if (!uC7.isInPlay) {
 		uC7.setID(ID);
 		uC7.setAttack(setAttack(ID));
 		uC7.setDefense(setDefense(ID));
 		uC7.isInPlay = true;
+		player.boardFull = false;
 	}
 	else {
-		return false;
+		player.boardFull = true;
+		return;
 	}
-	return true;
 }
-void playCard(int ID) {
-	//check if minion or spell
+void playCard(int ID, Player player) {
+	if ((ID >= 1 && ID <= 39) || (ID >= 67 && ID <= 72) || (ID >= 74 && ID <= 81) || (ID >= 83 && ID <= 84)) {
+		minionPlacement(ID, player);
+		ability(ID, player);
+	}
+	else if ((ID >= 40 && ID <= 65) || ID == 66 || ID == 73 || ID == 82) {
+
+	}
 }
 void drawCard(Player player) {
 	int deckSize = sizeof(player.Deck) / sizeof(player.Deck[0]);
@@ -490,6 +509,8 @@ void gameStart() {
 
 }
 void matchStart() {
+	User.isUser = true;
+	Opponent.isOpponent = true;
 	Opponent.createDeck();
 	User.createDeck();
 	mulligan();
