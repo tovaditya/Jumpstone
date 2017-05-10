@@ -1,4 +1,4 @@
-5/9/17
+5/10/17
 /*
 Peter Cardenas, Alex Huang, and Aditya (ASSART)
 Computer Science I
@@ -60,6 +60,9 @@ struct UserBoard {
 	void setDefense(int defense) {
 		this->defense = defense;
 	}
+	void activateAbility(){
+	    
+	}
 }uC1, uC2, uC3, uC4, uC5, uC6, uC7;
 UserBoard defaultMinion;
 struct OpponentBoard {
@@ -86,6 +89,9 @@ struct OpponentBoard {
 	}
 	void setDefense(int defense) {
 		this->defense = defense;
+	}
+	void activateAbility(){
+	    
 	}
 }oC1, oC2, oC3, oC4, oC5, oC6, oC7;
 OpponentBoard defaultMinion2;
@@ -426,12 +432,6 @@ string setAbilityText(int ID) {
 	};
 	return abText[ID - 1];
 }
-void userAbility(UserBoard minion) {
-	
-}
-void opponentAbility(OpponentBoard minion){
-    
-}
 void castSpell(Player player){
     
 }
@@ -442,6 +442,7 @@ void minionPlacement(int ID, Player player) {
     		uC1.setAttack(setAttack(ID));
     		uC1.setDefense(setDefense(ID));
     		uC1.isInPlay = true;
+    		uC1.activateAbility(ID);
     		player.boardFull = false;
     	}
     	else if (!uC2.isInPlay) {
@@ -449,6 +450,7 @@ void minionPlacement(int ID, Player player) {
     		uC2.setAttack(setAttack(ID));
     		uC2.setDefense(setDefense(ID));
     		uC2.isInPlay = true;
+    		uC2.activateAbility();
     		player.boardFull = false;
     	}
     	else if (!uC3.isInPlay) {
@@ -456,6 +458,7 @@ void minionPlacement(int ID, Player player) {
     		uC3.setAttack(setAttack(ID));
     		uC3.setDefense(setDefense(ID));
     		uC3.isInPlay = true;
+    		uC3.activateAbility();
     		player.boardFull = false;
     	}
     	else if (!uC4.isInPlay) {
@@ -463,6 +466,7 @@ void minionPlacement(int ID, Player player) {
     		uC4.setAttack(setAttack(ID));
     		uC4.setDefense(setDefense(ID));
     		uC4.isInPlay = true;
+    		uC4.activateAbility();
     		player.boardFull = false;
     	}
     	else if (!uC5.isInPlay) {
@@ -470,6 +474,7 @@ void minionPlacement(int ID, Player player) {
     		uC5.setAttack(setAttack(ID));
     		uC5.setDefense(setDefense(ID));
     		uC5.isInPlay = true;
+    		uC5.activateAbility();
     		player.boardFull = false;
     	}
     	else if (!uC6.isInPlay) {
@@ -477,6 +482,7 @@ void minionPlacement(int ID, Player player) {
     		uC6.setAttack(setAttack(ID));   
     		uC6.setDefense(setDefense(ID));
     		uC6.isInPlay = true;
+    		uC6.activateAbility();
     		player.boardFull = false;
     	}
     	else if (!uC7.isInPlay) {
@@ -484,6 +490,7 @@ void minionPlacement(int ID, Player player) {
     		uC7.setAttack(setAttack(ID));
     		uC7.setDefense(setDefense(ID));
     		uC7.isInPlay = true;
+    		uC7.activateAbility();
     		player.boardFull = false;
     	}
 	    else {
@@ -497,6 +504,7 @@ void minionPlacement(int ID, Player player) {
     		oC1.setAttack(setAttack(ID));
     		oC1.setDefense(setDefense(ID));
     		oC1.isInPlay = true;
+    		oC1.activateAbility();
     		player.boardFull = false;
     	}
     	else if (!oC2.isInPlay) {
@@ -504,6 +512,7 @@ void minionPlacement(int ID, Player player) {
     		oC2.setAttack(setAttack(ID));
     		oC2.setDefense(setDefense(ID));
     		oC2.isInPlay = true;
+    		oC2.activateAbility();
     		player.boardFull = false;
     	}
     	else if (!oC3.isInPlay) {
@@ -511,6 +520,7 @@ void minionPlacement(int ID, Player player) {
     		oC3.setAttack(setAttack(ID));
     		oC3.setDefense(setDefense(ID));
     		oC3.isInPlay = true;
+    		oC3.activateAbility();
     		player.boardFull = false;
     	}
     	else if (!oC4.isInPlay) {
@@ -518,6 +528,7 @@ void minionPlacement(int ID, Player player) {
     		oC4.setAttack(setAttack(ID));
     		oC4.setDefense(setDefense(ID));
     		oC4.isInPlay = true;
+    		oC4.activateAbility();
     		player.boardFull = false;
     	}
     	else if (!oC5.isInPlay) {
@@ -525,6 +536,7 @@ void minionPlacement(int ID, Player player) {
     		oC5.setAttack(setAttack(ID));
     		oC5.setDefense(setDefense(ID));
     		oC5.isInPlay = true;
+    		oC5.activateAbility();
     		player.boardFull = false;
     	}
     	else if (!oC6.isInPlay) {
@@ -532,6 +544,7 @@ void minionPlacement(int ID, Player player) {
     		oC6.setAttack(setAttack(ID));   
     		oC6.setDefense(setDefense(ID));
     		oC6.isInPlay = true;
+    		oC6.activateAbility();
     		player.boardFull = false;
     	}
     	else if (!oC7.isInPlay) {
@@ -539,6 +552,7 @@ void minionPlacement(int ID, Player player) {
     		oC7.setAttack(setAttack(ID));
     		oC7.setDefense(setDefense(ID));
     		oC7.isInPlay = true;
+    		oC7.activateAbility();
     		player.boardFull = false;
     	}
 	    else {
@@ -547,17 +561,11 @@ void minionPlacement(int ID, Player player) {
 	    }
     }
 }
-void playCard(int ID, Player player) {
+void playCard(int handLocation, Player player) {
 	if ((ID >= 1 && ID <= 39) || (ID >= 67 && ID <= 72) || (ID >= 74 && ID <= 81) || (ID >= 83 && ID <= 84)) {
-		minionPlacement(ID, player);
+		minionPlacement(player.Hand[handLocation], player);
 		if(player.boardFull){
 		    //say that it can't play minions
-		}
-		else if(player.isUser){
-		    userAbility(ID, UserBoard);
-		}
-		else if(player.isOpponent){
-		    opponentAbility( )
 		}
 	}
 	else if ((ID >= 40 && ID <= 65) || ID == 66 || ID == 73 || ID == 82) {
@@ -756,7 +764,7 @@ void attackCharacter(Player hero, UserBoard & minion1 = defaultMinion, OpponentB
 		hero.health -= minion2.attack;
 		minion2.setIsAttacking(false);
 	}
-}
+} // put this in the struct
 void attackMinion(UserBoard minion1, OpponentBoard minion2) {
 	//hero attack is 0
 	if (minion1.isAttacking) {
@@ -769,7 +777,7 @@ void attackMinion(UserBoard minion1, OpponentBoard minion2) {
 		minion2.setDefense(minion2.defense - minion1.attack);
 		minion2.setIsAttacking(false);
 	}
-}
+} // put this in the struct
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode) {
 	//set the graphics driver
 	GrDriver = VGA; //800x600 by monitor
