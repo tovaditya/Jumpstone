@@ -12,11 +12,12 @@ Jumpstone: Hearthstone with Mario Characters
 #include <Windows.h>
 #include <cmath>
 #include "Pixel.h"
-void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode);
-#pragma region function prototypes
 struct Player;
 struct UserBoard;
 struct OpponentBoard;
+int GrDriver, GrMode, ErrorCode;
+#pragma region function prototypes
+void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode);
 string setName(int ID);
 int setAttack(int ID);
 int setDefense(int ID);
@@ -37,10 +38,6 @@ struct UserBoard {
 	bool isInPlay;
 	bool isAttacking;
 	string abilityText;
-	struct Player;
-	void attackHero(Player hero) {
-		hero.health -= attack;
-	}
 	void setAbilityText(string abilityText) {
 		this->abilityText = abilityText;
 	}
@@ -67,9 +64,6 @@ struct OpponentBoard {
 	bool isInPlay;
 	bool isAttacking;
 	string abilityText;
-	void attackHero(Player hero) {
-		hero.health -= attack;
-	}
 	void setAbilityText(string abilityText) {
 		this->abilityText = abilityText;
 	}
@@ -186,6 +180,9 @@ struct Player {
 }Opponent, User;
 void main() {
 	srand((unsigned int)time(NULL));
+	gr_Start(GrDriver, GrMode, ErrorCode);
+	drawBoard();
+	drawMinion(Antasma, 36, 738);
 	system("pause");
 	return;
 }
@@ -252,7 +249,7 @@ void drawBoard() {
 	//rect 7: hand
 	rectangle(l5 + 456, t5, r5 + 456, b5);
 	rectangle(l5 + 457, t5 + 1, r5 + 457, b5 + 1);
-	rectangle(l5 + 458, t5 + 2, r5 + 459, b5 + 2);
+	rectangle(l5 + 458, t5 + 2, r5 + 458, b5 + 2);
 
 	//rect 8: hand
 	rectangle(l5 + 684, t5, r5 + 684, b5);
@@ -645,6 +642,7 @@ void mulligan() {
 		User.Hand[3], User.Hand[4] = 66;
 	}
 	//mulligan for user
+	/*
 	if (mDone) {
 		if (clickedRegion1) {
 			while (User.Hand[0] != -1) {
@@ -724,6 +722,7 @@ void mulligan() {
 			}
 		}
 	}
+	*/
 	//mulligan for computer (opponent)
 }
 void turn() {
@@ -748,8 +747,24 @@ void turn() {
 		}
 	}
 }
-void render(int ID, int x, int y) {//starts at the top left
+void renderMinion(int ID, UserBoard minion1, OpponentBoard minion2) {
+	if (minion1.isInPlay) {
 
+	}
+	else if (minion2.isInPlay) {
+
+	}
+}
+void renderCard(int ID, int x, int y) {//starts at the top left
+	
+}
+void attackHero(Player hero, UserBoard minion1, OpponentBoard minion2) {
+	if (minion1.isAttacking) {
+		hero.health -= minion1.attack;
+	}
+	else if (minion2.isAttacking) {
+		hero.health -= minion2.attack;
+	}
 }
 void attackMinion(UserBoard minion1, OpponentBoard minion2) {
 	//hero attack is 0
@@ -758,7 +773,7 @@ void attackMinion(UserBoard minion1, OpponentBoard minion2) {
 		minion2.setDefense(minion2.defense - minion1.attack);
 		minion1.setIsAttacking(false);
 	}
-	else {
+	else if(minion2.isAttacking) {
 		minion1.setDefense(minion1.defense - minion2.attack);
 		minion2.setDefense(minion2.defense - minion1.attack);
 		minion2.setIsAttacking(false);
