@@ -183,8 +183,7 @@ void main() {
 	srand((unsigned int)time(NULL));
 	gr_Start(GrDriver, GrMode, ErrorCode);
 	drawBoard();
-	drawMinionCardback(36, 738);
-	drawSpellCardBack(36+228, 738);
+	drawMinion(Antasma, 36, 738);
 	system("pause");
 	return;
 }
@@ -426,7 +425,7 @@ string setAbilityText(int ID) {
 	return abText[ID - 1];
 }
 void ability(int ID, Player player) {
-
+	
 }
 void cast(int ID, Player player) {
 
@@ -461,6 +460,7 @@ void minionPlacement(int ID, Player player) {
 			uC4.setID(ID);
 			uC4.setAttack(setAttack(ID));
 			uC4.setDefense(setDefense(ID));
+			uC1.setAbilityText(setAbilityText(ID));
 			uC4.setAbilityText(setAbilityText(ID));
 			uC4.isInPlay = true;
 			player.boardFull = false;
@@ -645,83 +645,83 @@ void mulligan() {
 	//mulligan for user
 	/*
 	if (mDone) {
-	if (clickedRegion1) {
-	while (User.Hand[0] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[0];
-	User.Hand[0] = -1;
-	}
-	i++;
-	}
-	if (clickedRegion2) {
-	while (User.Hand[1] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[1];
-	User.Hand[1] = -1;
-	}
-	i++;
-	}
-	if (clickedRegion3) {
-	while (User.Hand[2] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[2];
-	User.Hand[2] = -1;
-	}
-	i++;
-	}
-	}
-	}
-	else if (clickedRegion3) {
-	while (User.Hand[2] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[2];
-	User.Hand[2] = -1;
-	}
-	i++;
-	}
-	}
-	}
-	else if (clickedRegion2) {
-	while (User.Hand[1] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[1];
-	User.Hand[1] = -1;
-	}
-	i++;
-	}
-	if (clickedRegion3) {
-	while (User.Hand[2] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[2];
-	User.Hand[2] = -1;
-	}
-	i++;
-	}
-	}
-	}
-	else if (clickedRegion3) {
-	while (User.Hand[2] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[2];
-	User.Hand[2] = -1;
-	}
-	i++;
-	}
-	}
-	for (int i = 0; i < 3; i++) {
-	if (User.Hand[i] == -1) {
-	location = rand() % deckSize;
-	User.Hand[i] = User.Deck[location];
-	User.isDrawn(location);
-	}
-	}
+		if (clickedRegion1) {
+			while (User.Hand[0] != -1) {
+				int i = 0;
+				if (User.Deck[i] = -1) {
+					User.Deck[i] = User.Hand[0];
+					User.Hand[0] = -1;
+				}
+				i++;
+			}
+			if (clickedRegion2) {
+				while (User.Hand[1] != -1) {
+					int i = 0;
+					if (User.Deck[i] = -1) {
+						User.Deck[i] = User.Hand[1];
+						User.Hand[1] = -1;
+					}
+					i++;
+				}
+				if (clickedRegion3) {
+					while (User.Hand[2] != -1) {
+						int i = 0;
+						if (User.Deck[i] = -1) {
+							User.Deck[i] = User.Hand[2];
+							User.Hand[2] = -1;
+						}
+						i++;
+					}
+				}
+			}
+			else if (clickedRegion3) {
+				while (User.Hand[2] != -1) {
+					int i = 0;
+					if (User.Deck[i] = -1) {
+						User.Deck[i] = User.Hand[2];
+						User.Hand[2] = -1;
+					}
+					i++;
+				}
+			}
+		}
+		else if (clickedRegion2) {
+			while (User.Hand[1] != -1) {
+				int i = 0;
+				if (User.Deck[i] = -1) {
+					User.Deck[i] = User.Hand[1];
+					User.Hand[1] = -1;
+				}
+				i++;
+			}
+			if (clickedRegion3) {
+				while (User.Hand[2] != -1) {
+					int i = 0;
+					if (User.Deck[i] = -1) {
+						User.Deck[i] = User.Hand[2];
+						User.Hand[2] = -1;
+					}
+					i++;
+				}
+			}
+		}
+		else if (clickedRegion3) {
+			while (User.Hand[2] != -1) {
+				int i = 0;
+				if (User.Deck[i] = -1) {
+					User.Deck[i] = User.Hand[2];
+					User.Hand[2] = -1;
+				}
+				i++;
+			}
+		}
+		for (int i = 0; i < 3; i++) {
+			if (User.Hand[i] == -1) {
+				location = rand() % deckSize;
+				User.Hand[i] = User.Deck[location];
+				User.isDrawn(location);
+			}
+		}
 	}
 	*/
 	//mulligan for computer (opponent)
@@ -748,7 +748,7 @@ void turn() {
 		}
 	}
 }
-void renderMinion(int ID, UserBoard minion1, OpponentBoard minion2, int x, int y) {
+void renderMinion(int ID, UserBoard minion1, OpponentBoard minion2) {
 	if (minion1.isInPlay) {
 
 	}
@@ -757,7 +757,7 @@ void renderMinion(int ID, UserBoard minion1, OpponentBoard minion2, int x, int y
 	}
 }
 void renderCard(int ID, int x, int y) {//starts at the top left
-
+	
 }
 void attackHero(Player hero, UserBoard minion1, OpponentBoard minion2) {
 	if (minion1.isAttacking) {
@@ -774,7 +774,7 @@ void attackMinion(UserBoard minion1, OpponentBoard minion2) {
 		minion2.setDefense(minion2.defense - minion1.attack);
 		minion1.setIsAttacking(false);
 	}
-	else if (minion2.isAttacking) {
+	else if(minion2.isAttacking) {
 		minion1.setDefense(minion1.defense - minion2.attack);
 		minion2.setDefense(minion2.defense - minion1.attack);
 		minion2.setIsAttacking(false);
