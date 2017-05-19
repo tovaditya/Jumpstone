@@ -19,6 +19,8 @@ string setName(int ID);
 int setAttack(int ID);
 int setDefense(int ID);
 int setManaCost(int ID);
+const int x = 862;
+const int y = 386;
 string setAbilityText(int ID);
 void main() {
 	srand((unsigned int)time(NULL));
@@ -141,6 +143,7 @@ string setAbilityText(int ID) {
 	return abText[ID - 1];
 }
 void renderCard() {
+	setbkcolor(WHITE);
 	int ID;
 	bool shownCard[84];
 	int count = 0;
@@ -148,6 +151,7 @@ void renderCard() {
 		shownCard[i] = false;
 	}
 	while (true) {
+		cleardevice();
 		ID = rand() % 84 + 1;
 		if (count == 84) {
 			count = 0;
@@ -161,17 +165,160 @@ void renderCard() {
 			}
 			else {
 				if ((ID >= 1 && ID <= 39) || (ID >= 67 && ID <= 72) || (ID >= 74 && ID <= 81) || (ID >= 83 && ID <= 84)) {
-					drawMinionCardback(862, 386);
-					outtextxy();
+					drawMinionCardback(x, y);
+					
 				}
 				else if ((ID >= 40 && ID <= 65) || ID == 66 || ID == 73 || ID == 82) {
-					drawSpellCardBack(862, 386);
+					drawSpellCardBack(x, y);
 				}
 				shownCard[ID - 1] = true;
 				count++;
 			}
 		}
 	}
+}
+void putMinionStuff(int ID) {
+	
+}
+void putSpellStuff(int ID) {
+
+}
+void drawMinionImage(int ID) {
+	if (ID >= 66) {
+		drawTokenImage(ID);
+	}
+	else {
+		switch (ID) {
+		case 1:
+			drawMinion(Mini_Goomba, x + 22, y + 22);
+			break;
+		case 2:
+			drawMinion(Block, x + 22, y + 22);
+			break;
+		case 3:
+			drawMinion(Goomba, x + 22, y + 22);
+			break;
+		case 4:
+			drawMinion(Shy_Guy, x + 22, y + 22);
+			break;
+		case 5:
+			drawMinion(Toad, x + 22, y + 22);
+			break;
+		case 6:
+			drawMinion(Bill_Blaster, x + 22, y + 22);
+			break;
+		case 7:
+			drawMinion(Fuzzy, x + 22, y + 22);
+			break;
+		case 8:
+			drawMinion(Luma, x + 22, y + 22);
+			break;
+		case 9:
+			drawMinion(Rocky_Wench, x + 22, y + 22);
+			break;
+		case 10:
+			drawMinion(Cheep_Cheep, x + 22, y + 22);
+			break;
+		case 11:
+			drawMinion(Green_Koopa, x + 22, y + 22);
+			break;
+		case 12:
+			drawMinion(Para_Goomba, x + 22, y + 22);
+			break;
+		case 13:
+			drawMinion(Pipe_Pirahna_Plant, x + 22, y + 22);
+			break;
+		case 14:
+			drawMinion(Toadsworth, x + 22, y + 22);
+			break;
+		case 15:
+			drawMinion(Yoshi_Egg, x + 22, y + 22);
+			break;
+		case 16:
+			drawMinion(Boo, x + 22, y + 22);
+			break;
+		case 17:
+			drawMinion(Bowser_Jr, x + 22, y + 22);
+			break;
+		case 18:
+			drawMinion(Bowser_Statue, x + 22, y + 22);
+			break;
+		case 19:
+			drawMinion(Koopatrol, x + 22, y + 22);
+			break;
+		case 20:
+			drawMinion(Magikoopa, x + 22, y + 22);
+			break;
+		case 21:
+			drawMinion(Pokey, x + 22, y + 22);
+			break;
+		case 22:
+			drawMinion(Red_Koopa, x + 22, y + 22);
+			break;
+		case 23:
+			drawMinion(Wiggler, x + 22, y + 22);
+			break;
+		case 24:
+			drawMinion(Boomarang_Bro, x + 22, y + 22);
+			break;
+		case 25:
+			drawMinion(Captain_Toad, x + 22, y + 22);
+			break;
+		case 26:
+			drawMinion(Dry_Bones, x + 22, y + 22);
+			break;
+		case 27:
+			drawMinion(Fawful, x + 22, y + 22);
+			break;
+		case 28:
+			drawMinion(Goomba_Tower, x + 22, y + 22);
+			break;
+		case 29:
+			drawMinion(Hammer_Bro, x + 22, y + 22);
+			break;
+		case 30:
+			drawMinion(, x + 22, y + 22);
+			break;
+		case 31:
+			drawMinion(, x + 22, y + 22);
+			break;
+		case 32:
+			drawMinion(, x + 22, y + 22);
+			break;
+		case 33:
+			drawMinion(, x + 22, y + 22);
+			break;
+		case 34:
+			drawMinion(, x + 22, y + 22);
+			break;
+		case 35:
+			drawMinion(, x + 22, y + 22);
+			break;
+		case 36:
+			drawMinion(, x + 22, y + 22);
+			break;
+		case 37:
+			drawMinion(, x + 22, y + 22);
+			break;
+		case 38:
+			drawMinion(, x + 22, y + 22);
+			break;
+		case 39:
+			drawMinion(, x + 22, y + 22);
+			break;
+		}
+	}
+}
+void drawSpellImage(int ID) {
+	if (ID >= 66) {
+		drawTokenImage(ID);
+	}
+	else {
+
+	}
+}
+void drawTokenImage(int ID) {
+
 }
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode) {
 	//set the graphics driver
