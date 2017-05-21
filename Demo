@@ -8,11 +8,11 @@
 #include "Cardback.h"
 int GrDriver, GrMode, ErrorCode;
 const int cardNameOffsetX = 96;
-const int cardNameOffsetY = 120;
+const int cardNameOffsetY = 122;
 const int cardDescriptionOffsetX = 96;
-const int cardDescriptionOffsetY = 168;
-const int cardManaOffsetX = 168;
-const int cardManaOffsetY = 21;
+const int cardDescriptionOffsetY = 180;
+const int cardManaOffsetX = 169;
+const int cardManaOffsetY = 23;
 const int cardAttackOffsetX = 25;
 const int cardAttackOffsetY = 220;
 const int cardDefenseOffsetX = 168;
@@ -32,7 +32,7 @@ string setAbilityText(int ID);
 void main() {
 	srand((unsigned int)time(NULL));
 	gr_Start(GrDriver, GrMode, ErrorCode);
-	
+	cout << textheight("chicken") << endl;
 	renderCard();
 	system("pause");
 	return;
@@ -100,14 +100,14 @@ string setAbilityText(int ID) {
 		"Deal 3 damage",
 		"Whenever this card takes damage, summon a bat",
 		"Add 2 / 2 to every Goomba on the board",
-		"Draw this card when Lava Pool is played. When played, replace your character with dry bowser.Summon two random Koopalings",
+		"Draw this card when Lava Pool is played. When played, replace your character with dry bowser. Summon two random Koopalings",
 		"Heal all characters to full health",
 		"Take control of a enemy minion",
 		"Give unit + 2 attack",
 		"Deal 2 damage",
 		"Give a unit + 3 health",
-		"Equip to a minion.When it dies, bring it back with half health",
-		"Select a character.Deal 8 damage to it next turn.",
+		"Equip to a minion. When it dies, bring it back with half health",
+		"Select a character. Deal 8 damage to it next turn.",
 		"Set all minions to 1 health",
 		"Give a minion \"Summon a Luma at the beginning of your turn.\"",
 		"Give a minion Invincible for this turn only",
@@ -126,7 +126,7 @@ string setAbilityText(int ID) {
 		"Summon Sonic",
 		"Return all minions to their owner's hand",
 		"Summons 3 random Koopalings",
-		"Give unit + 5 health, +7 attack",
+		"Give unit + 5 health, + 7 attack",
 		"Destroy all minions",
 		"Summon 3 Bros.that have died this game",
 		"Give 1 more Mana this turn only",
@@ -186,7 +186,7 @@ void renderCard() {
 				}
 				shownCard[ID - 1] = true;
 				count++;
-				Sleep(500);
+				Sleep(5000);
 			}
 			
 		}
@@ -194,6 +194,11 @@ void renderCard() {
 }
 void putMinionStuff(int ID, int x, int y) {
 	drawImage(ID);
+	int amountAdded = 0;
+	int count = 0;
+	int len;
+	int descYAdjust;
+	string descHolder[16];
 	string nam = setName(ID);
 	const char* name = nam.c_str();
 	string desc = setAbilityText(ID);
@@ -208,13 +213,51 @@ void putMinionStuff(int ID, int x, int y) {
 	string def2 = to_string(def);
 	const char* defense = def2.c_str();
 	outtextxy(x + cardNameOffsetX, y + cardNameOffsetY, name);
-	outtextxy(x + cardDescriptionOffsetX, y + cardDescriptionOffsetY, description);
 	outtextxy(x + cardManaOffsetX, y + cardManaOffsetY, manaCost);
 	outtextxy(x + cardAttackOffsetX, y + cardAttackOffsetY, attack);
 	outtextxy(x + cardDefenseOffsetX, y + cardDefenseOffsetY, defense);
+	if (desc.length() <= 16) {
+		outtextxy(x + cardDescriptionOffsetX, y + cardDescriptionOffsetY, description);
+	}
+	else {
+		len = desc.length();
+		while (!(amountAdded == len)) {
+			if (desc.length() >= 16) {
+				for (int i = 0; i < desc.length(); i++) {
+					if (desc[15 - i] == ' ') {
+						descHolder[count] = desc.substr(0, 16 - i);
+						amountAdded += descHolder[count].length();
+						desc = desc.substr(16 - i, desc.length() - (16 - i));
+						count++;
+						i = desc.length();
+					}
+				}
+			}
+			else {
+				descHolder[count] = desc;
+				amountAdded += descHolder[count].length();
+				count++;
+			}
+		}
+		if (count % 2 == 1) {
+			descYAdjust = (count - 1) / 2 * 11;//11 is text height
+		}
+		else {
+			descYAdjust = (count / 2 - 1) * 11 + 6;//6 is approx half text height
+		}
+		for (int i = 0; i < count; i++) {
+			description = descHolder[i].c_str();
+			outtextxy(x + cardDescriptionOffsetX, y + cardDescriptionOffsetY - descYAdjust + 11 * i, description);
+		}
+	}
 }
 void putSpellStuff(int ID, int x, int y) {
 	drawImage(ID);
+	int amountAdded = 0;
+	int count = 0;
+	int len;
+	int descYAdjust;
+	string descHolder[16];
 	string nam = setName(ID);
 	const char* name = nam.c_str();
 	string desc = setAbilityText(ID);
@@ -223,8 +266,41 @@ void putSpellStuff(int ID, int x, int y) {
 	string mana2 = to_string(mana);
 	const char* manaCost = mana2.c_str();
 	outtextxy(x + cardNameOffsetX, y + cardNameOffsetY, name);
-	outtextxy(x + cardDescriptionOffsetX, y + cardDescriptionOffsetY, description);
 	outtextxy(x + cardManaOffsetX, y + cardManaOffsetY, manaCost);
+	if (desc.length() <= 16) {
+		outtextxy(x + cardDescriptionOffsetX, y + cardDescriptionOffsetY, description);
+	}
+	else {
+		len = desc.length();
+		while (!(amountAdded == len)) {
+			if (desc.length() >= 16) {
+				for (int i = 0; i < desc.length(); i++) {
+					if (desc[15 - i] == ' ') {
+						descHolder[count] = desc.substr(0, 16 - i);
+						amountAdded += descHolder[count].length();
+						desc = desc.substr(16 - i, desc.length() - (16 - i));
+						count++;
+						i = desc.length();
+					}
+				}
+			}
+			else {
+				descHolder[count] = desc;
+				amountAdded += descHolder[count].length();
+				count++;
+			}
+		}
+		if (count % 2 == 1) {
+			descYAdjust = (count - 1) / 2 * 11;//11 is text height
+		}
+		else {
+			descYAdjust = (count / 2 - 1) * 11 + 6;//6 is approx half text height
+		}
+		for (int i = 0; i < count; i++) {
+			description = descHolder[i].c_str();
+			outtextxy(x + cardDescriptionOffsetX, y + cardDescriptionOffsetY - descYAdjust + 11 * i, description);
+		}
+	}
 }
 void drawImage(int ID) {
 	switch (ID) {
