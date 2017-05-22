@@ -2,8 +2,7 @@ const int Cardback_Height = 246;
 const int Cardback_Width = 192;
 int fillerCard[Cardback_Height][Cardback_Width];
 void cpyCardback(const int tbC[][Cardback_Width]);
-void drawMinionCardback(int x, int y);
-void drawSpellCardback(int x, int y);
+void drawCardback(int x, int y);
 #pragma region SPELL_CARDBACK_DRAW 
 const int Spell_Cardback_ARRY[Cardback_Height][Cardback_Width] = {
 
