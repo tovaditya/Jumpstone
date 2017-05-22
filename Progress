@@ -60,9 +60,30 @@ struct UserBoard {
 	int turnActivated;
 	bool canAttack = false;
 	bool hasTaunt = false;
+	bool hasDoubleJump = false;
+	int spikyLevel = 0;
 	string abilityText;
 	void triggerAbility() {
-
+	    if(ID == 6){//triggers at end of turn
+	        initiateMinion(69, User);
+	    }
+        else if(ID == 7){//triggers when minion attacks
+            if(maxDefense - defense >= 3){
+                defense += 3;
+            }
+            else{
+                defense = maxDefense;
+            }
+        }
+        else if(ID == 11){//triggers when minion dies
+            if(User.cardsInHand(User.Hand) == 7){
+            }
+            else{
+                User.Hand[User.cardsInHand(User.Hand)] = 73;
+                User.drawHand();
+            }
+        }
+        
 	}
 	void activateAbility() {//ones not listed don't have abilities or are triggers
 		if (ID == 2) {
@@ -70,12 +91,22 @@ struct UserBoard {
 		}
 		else if (ID == 4) {
 			canAttack = true;
-		}//ID 6 summon ID 69 end of each turn, ID 7 heals 3 when attacks 
+		} 
 		else if (ID == 8) {
 			takeCard(User);
 		}
 		else if (ID == 9) {
 			// find target by deciding which region player clicked, then deal 1 dmg to it
+		}
+		else if (ID == 12){
+		    hasDoubleJump = true;
+		}
+		else if(ID == 13){
+		    hasTaunt = true;
+		    spikyLevel = 2;
+		}
+		else if(ID == 14){
+		    initiateMinion(5, User);
 		}
 	}
 	void setAbilityText(string abilityText) {
@@ -168,6 +199,20 @@ struct Player {
 	int mana = 0;
 	int manaThisTurn = 0;
 	int fatigueTurn = 0;
+	void drawHand(){
+	    int handSize = sizeof(Hand) / sizeof(Hand[0]);
+	    for(int i = 0; i < handSize; i ++){
+	        setcolor(WHITE);
+	        if(isUser){
+	            bar(36 + cardOffset * i, 738, 36 + cardOffset * i - 192, 738 + 246);
+	        }
+	    }
+	    for(int i = 0; i < cardsInHand(Hand); i ++){
+	        if(isUser){
+	            renderCard(Hand[i], 36 + cardOffset * i, 738);
+	        }
+	    }
+	}
 	void setMana(int mana) {
 		this->mana = mana;
 		return;
@@ -713,6 +758,7 @@ void takeCard(Player player) {
 		}
 		player.isDrawn(location);
 	}
+	player.drawHand();
 }
 void gameStart() {
 
@@ -847,6 +893,7 @@ void mulligan() {
 	}
 	}
 	*/
+	User.drawHand();
 	//mulligan for computer (opponent)
 }
 void turn() {
