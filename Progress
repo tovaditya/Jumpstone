@@ -17,6 +17,17 @@ struct Player;
 struct UserBoard;
 struct OpponentBoard;
 int GrDriver, GrMode, ErrorCode;
+const int cardNameOffsetX = 96;
+const int cardNameOffsetY = 122;
+const int cardDescriptionOffsetX = 96;
+const int cardDescriptionOffsetY = 180;
+const int cardManaOffsetX = 169;
+const int cardManaOffsetY = 23;
+const int cardAttackOffsetX = 25;
+const int cardAttackOffsetY = 220;
+const int cardDefenseOffsetX = 168;
+const int cardDefenseOffsetY = 220;
+const int cardOffset = 228;
 #pragma region function prototypes
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode);
 string setName(int ID);
@@ -24,21 +35,49 @@ int setAttack(int ID);
 int setDefense(int ID);
 int setManaCost(int ID);
 void ability(int ID, Player player);
-void minionPlacement(int ID, Player player);
+void initiateMinion(int ID, Player player);
 void playCard(int ID, Player player);
 void takeCard(Player player);
 void render(int ID, int x, int y);
 void attackMinion(UserBoard minion1, OpponentBoard minion2);
 void mulligan();
 void drawBoard();
+void renderCard(int ID, int x, int y);
+void drawImage(int ID, int x, int y);
+void putMinionStuff(int ID, int x, int y);
+void putSpellStuff(int ID, int x, int y);
 #pragma endregion
 struct UserBoard {
 	int ID;
 	int attack;
+	int maxAttack;
 	int defense;
+	int maxDefense;
+	int xPos;
+	int yPos = 598;
 	bool isInPlay;
-	bool isAttacking;
+	bool isAttacking = false;
+	int turnActivated;
+	bool canAttack = false;
+	bool hasTaunt = false;
 	string abilityText;
+	void triggerAbility() {
+
+	}
+	void activateAbility() {//ones not listed don't have abilities or are triggers
+		if (ID == 2) {
+			hasTaunt = true;
+		}
+		else if (ID == 4) {
+			canAttack = true;
+		}//ID 6 summon ID 69 end of each turn, ID 7 heals 3 when attacks 
+		else if (ID == 8) {
+			takeCard(User);
+		}
+		else if (ID == 9) {
+			// find target by deciding which region player clicked, then deal 1 dmg to it
+		}
+	}
 	void setAbilityText(string abilityText) {
 		this->abilityText = abilityText;
 	}
@@ -53,18 +92,38 @@ struct UserBoard {
 	}
 	void setAttack(int attack) {
 		this->attack = attack;
+		maxAttack = attack;
 	}
 	void setDefense(int defense) {
 		this->defense = defense;
+		maxDefense = defense;
+	}
+	void createBorder() {
+		rectangle(xPos + 1, yPos + 1, xPos + 192 + 1, yPos + 100 + 1);
+	}
+	void deleteMinion() {
+		setcolor(WHITE);
+		bar(xPos + 1, yPos + 1, xPos + 192 + 1, yPos + 100 + 1);
+		isInPlay = false;
+	}
+	void renderMinion() {
+		drawImage(ID, xPos, yPos);
 	}
 }uC1, uC2, uC3, uC4, uC5, uC6, uC7;
 struct OpponentBoard {
 	int ID;
 	int attack;
+	int maxAttack;
 	int defense;
+	int maxDefense;
 	bool isInPlay;
-	bool isAttacking;
+	bool isAttacking = false;
+	int turnActivated;
+	bool canAttack = false;
+	bool hasTaunt = false;
 	string abilityText;
+	int xPos;
+	int yPos = 419;
 	void setAbilityText(string abilityText) {
 		this->abilityText = abilityText;
 	}
@@ -79,9 +138,21 @@ struct OpponentBoard {
 	}
 	void setAttack(int attack) {
 		this->attack = attack;
+		maxAttack = attack;
 	}
 	void setDefense(int defense) {
 		this->defense = defense;
+		maxDefense = defense;
+	}
+	void createBorder() {
+		rectangle(xPos + 1, yPos + 1, xPos + 192 + 1, yPos + 100 + 1);
+	}
+	void deleteMinion() {
+		setcolor(WHITE);
+		bar(xPos + 1, yPos + 1, xPos + 192 + 1, yPos + 100 + 1);
+	}
+	void renderMinion() {
+		drawImage(ID, xPos, yPos);
 	}
 }oC1, oC2, oC3, oC4, oC5, oC6, oC7;
 struct Player {
@@ -95,6 +166,7 @@ struct Player {
 	bool isF;
 	int turn = 0;
 	int mana = 0;
+	int manaThisTurn = 0;
 	int fatigueTurn = 0;
 	void setMana(int mana) {
 		this->mana = mana;
@@ -183,12 +255,12 @@ void main() {
 	srand((unsigned int)time(NULL));
 	gr_Start(GrDriver, GrMode, ErrorCode);
 	drawBoard();
-	drawMinion(Antasma, 36, 738);
 	system("pause");
 	return;
 }
 void drawBoard() {
 	cleardevice();
+	
 	//rect 1: full rectangle
 	int top1 = 0;
 	int left1 = 0;
@@ -215,7 +287,7 @@ void drawBoard() {
 	ellipse(X, Y, 0, 360, Xr, Yr);
 
 	fillellipse(X, Y, Xr, Yr);
-
+	
 	setcolor(0);
 	// add asthetics to rect 2
 
@@ -232,7 +304,19 @@ void drawBoard() {
 	int r4 = 1919;
 	int b4 = 1017;
 	rectangle(t4, l4, r4, b4);
-
+	setcolor(RED);
+	fillellipse(930, 726, 15, 15);
+	setcolor(GREEN);
+	fillellipse(930, 288, 15, 15);
+	setcolor(BLACK);
+	circle(930, 726, 15);
+	circle(930, 288, 15);
+	setcolor(BLUE);
+	fillellipse(1889, 708, 30, 20);
+	fillellipse(1889, 309, 30, 20);
+	setcolor(BLACK);
+	ellipse(1889, 708, 0, 360, 30, 20);
+	ellipse(1889, 309, 0, 360, 30, 20);
 	//rect 5: hand
 	int l5 = 36;
 	int t5 = 30;
@@ -424,13 +508,10 @@ string setAbilityText(int ID) {
 	};
 	return abText[ID - 1];
 }
-void ability(int ID, Player player) {
-	
-}
 void cast(int ID, Player player) {
 
 }
-void minionPlacement(int ID, Player player) {
+void initiateMinion(int ID, Player player) {
 	if (player.isUser) {
 		if (!uC1.isInPlay) {
 			uC1.setID(ID);
@@ -438,6 +519,9 @@ void minionPlacement(int ID, Player player) {
 			uC1.setDefense(setDefense(ID));
 			uC1.setAbilityText(setAbilityText(ID));
 			uC1.isInPlay = true;
+			uC1.xPos = 36 + cardOffset * 3;
+			uC1.createBorder();
+			uC1.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!uC2.isInPlay) {
@@ -446,6 +530,9 @@ void minionPlacement(int ID, Player player) {
 			uC2.setDefense(setDefense(ID));
 			uC2.setAbilityText(setAbilityText(ID));
 			uC2.isInPlay = true;
+			uC2.xPos = 36 + cardOffset * 2;
+			uC2.createBorder();
+			uC2.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!uC3.isInPlay) {
@@ -454,15 +541,20 @@ void minionPlacement(int ID, Player player) {
 			uC3.setDefense(setDefense(ID));
 			uC3.setAbilityText(setAbilityText(ID));
 			uC3.isInPlay = true;
+			uC3.xPos = 36 + cardOffset * 4;
+			uC3.createBorder();
+			uC3.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!uC4.isInPlay) {
 			uC4.setID(ID);
 			uC4.setAttack(setAttack(ID));
 			uC4.setDefense(setDefense(ID));
-			uC1.setAbilityText(setAbilityText(ID));
 			uC4.setAbilityText(setAbilityText(ID));
 			uC4.isInPlay = true;
+			uC4.xPos = 36 + cardOffset * 1;
+			uC4.createBorder();
+			uC4.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!uC5.isInPlay) {
@@ -471,6 +563,9 @@ void minionPlacement(int ID, Player player) {
 			uC5.setDefense(setDefense(ID));
 			uC5.setAbilityText(setAbilityText(ID));
 			uC5.isInPlay = true;
+			uC5.xPos = 36 + cardOffset * 5;
+			uC5.createBorder();
+			uC5.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!uC6.isInPlay) {
@@ -479,6 +574,9 @@ void minionPlacement(int ID, Player player) {
 			uC6.setDefense(setDefense(ID));
 			uC6.setAbilityText(setAbilityText(ID));
 			uC6.isInPlay = true;
+			uC6.xPos = 36 + cardOffset * 0;
+			uC6.createBorder();
+			uC6.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!uC7.isInPlay) {
@@ -487,6 +585,9 @@ void minionPlacement(int ID, Player player) {
 			uC7.setDefense(setDefense(ID));
 			uC7.setAbilityText(setAbilityText(ID));
 			uC7.isInPlay = true;
+			uC7.xPos = 36 + cardOffset * 6;
+			uC7.createBorder();
+			uC7.renderMinion();
 			player.boardFull = true;
 		}
 		else {
@@ -500,6 +601,9 @@ void minionPlacement(int ID, Player player) {
 			oC1.setDefense(setDefense(ID));
 			oC1.setAbilityText(setAbilityText(ID));
 			oC1.isInPlay = true;
+			oC1.xPos = 36 + cardOffset * 3;
+			oC1.createBorder();
+			oC1.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!oC2.isInPlay) {
@@ -508,6 +612,9 @@ void minionPlacement(int ID, Player player) {
 			oC2.setDefense(setDefense(ID));
 			oC2.setAbilityText(setAbilityText(ID));
 			oC2.isInPlay = true;
+			oC2.xPos = 36 + cardOffset * 2;
+			oC2.createBorder();
+			oC3.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!oC3.isInPlay) {
@@ -516,6 +623,9 @@ void minionPlacement(int ID, Player player) {
 			oC3.setDefense(setDefense(ID));
 			oC3.setAbilityText(setAbilityText(ID));
 			oC3.isInPlay = true;
+			oC3.xPos = 36 + cardOffset * 4;
+			oC3.createBorder();
+			oC3.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!oC4.isInPlay) {
@@ -525,6 +635,9 @@ void minionPlacement(int ID, Player player) {
 			oC1.setAbilityText(setAbilityText(ID));
 			oC4.setAbilityText(setAbilityText(ID));
 			oC4.isInPlay = true;
+			oC4.xPos = 36 + cardOffset * 1;
+			oC4.createBorder();
+			oC4.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!oC5.isInPlay) {
@@ -533,6 +646,9 @@ void minionPlacement(int ID, Player player) {
 			oC5.setDefense(setDefense(ID));
 			oC5.setAbilityText(setAbilityText(ID));
 			oC5.isInPlay = true;
+			oC5.xPos = 36 + cardOffset * 5;
+			oC5.createBorder();
+			oC5.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!oC6.isInPlay) {
@@ -541,6 +657,9 @@ void minionPlacement(int ID, Player player) {
 			oC6.setDefense(setDefense(ID));
 			oC6.setAbilityText(setAbilityText(ID));
 			oC6.isInPlay = true;
+			oC6.xPos = 36 + cardOffset * 0;
+			oC6.createBorder();
+			oC6.renderMinion();
 			player.boardFull = false;
 		}
 		else if (!oC7.isInPlay) {
@@ -549,18 +668,22 @@ void minionPlacement(int ID, Player player) {
 			oC7.setDefense(setDefense(ID));
 			oC7.setAbilityText(setAbilityText(ID));
 			oC7.isInPlay = true;
+			oC7.xPos = 36 + cardOffset * 6;
+			oC7.createBorder();
+			oC7.renderMinion();
 			player.boardFull = true;
 		}
 		else {
 			player.boardFull = true;
-			return;
 		}
 	}
 }
 void playCard(int ID, Player player) {
-	if ((ID >= 1 && ID <= 39) || (ID >= 67 && ID <= 72) || (ID >= 74 && ID <= 81) || (ID >= 83 && ID <= 84)) {
-		minionPlacement(ID, player);
-		ability(ID, player);
+	if (player.manaThisTurn < setManaCost(ID)) {
+
+	}
+	else if ((ID >= 1 && ID <= 39) || (ID >= 67 && ID <= 72) || (ID >= 74 && ID <= 81) || (ID >= 83 && ID <= 84)) {
+		initiateMinion(ID, player);\
 	}
 	else if ((ID >= 40 && ID <= 65) || ID == 66 || ID == 73 || ID == 82) {
 		cast(ID, player);
@@ -645,83 +768,83 @@ void mulligan() {
 	//mulligan for user
 	/*
 	if (mDone) {
-		if (clickedRegion1) {
-			while (User.Hand[0] != -1) {
-				int i = 0;
-				if (User.Deck[i] = -1) {
-					User.Deck[i] = User.Hand[0];
-					User.Hand[0] = -1;
-				}
-				i++;
-			}
-			if (clickedRegion2) {
-				while (User.Hand[1] != -1) {
-					int i = 0;
-					if (User.Deck[i] = -1) {
-						User.Deck[i] = User.Hand[1];
-						User.Hand[1] = -1;
-					}
-					i++;
-				}
-				if (clickedRegion3) {
-					while (User.Hand[2] != -1) {
-						int i = 0;
-						if (User.Deck[i] = -1) {
-							User.Deck[i] = User.Hand[2];
-							User.Hand[2] = -1;
-						}
-						i++;
-					}
-				}
-			}
-			else if (clickedRegion3) {
-				while (User.Hand[2] != -1) {
-					int i = 0;
-					if (User.Deck[i] = -1) {
-						User.Deck[i] = User.Hand[2];
-						User.Hand[2] = -1;
-					}
-					i++;
-				}
-			}
-		}
-		else if (clickedRegion2) {
-			while (User.Hand[1] != -1) {
-				int i = 0;
-				if (User.Deck[i] = -1) {
-					User.Deck[i] = User.Hand[1];
-					User.Hand[1] = -1;
-				}
-				i++;
-			}
-			if (clickedRegion3) {
-				while (User.Hand[2] != -1) {
-					int i = 0;
-					if (User.Deck[i] = -1) {
-						User.Deck[i] = User.Hand[2];
-						User.Hand[2] = -1;
-					}
-					i++;
-				}
-			}
-		}
-		else if (clickedRegion3) {
-			while (User.Hand[2] != -1) {
-				int i = 0;
-				if (User.Deck[i] = -1) {
-					User.Deck[i] = User.Hand[2];
-					User.Hand[2] = -1;
-				}
-				i++;
-			}
-		}
-		for (int i = 0; i < 3; i++) {
-			if (User.Hand[i] == -1) {
-				location = rand() % deckSize;
-				User.Hand[i] = User.Deck[location];
-				User.isDrawn(location);
-			}
-		}
+	if (clickedRegion1) {
+	while (User.Hand[0] != -1) {
+	int i = 0;
+	if (User.Deck[i] = -1) {
+	User.Deck[i] = User.Hand[0];
+	User.Hand[0] = -1;
+	}
+	i++;
+	}
+	if (clickedRegion2) {
+	while (User.Hand[1] != -1) {
+	int i = 0;
+	if (User.Deck[i] = -1) {
+	User.Deck[i] = User.Hand[1];
+	User.Hand[1] = -1;
+	}
+	i++;
+	}
+	if (clickedRegion3) {
+	while (User.Hand[2] != -1) {
+	int i = 0;
+	if (User.Deck[i] = -1) {
+	User.Deck[i] = User.Hand[2];
+	User.Hand[2] = -1;
+	}
+	i++;
+	}
+	}
+	}
+	else if (clickedRegion3) {
+	while (User.Hand[2] != -1) {
+	int i = 0;
+	if (User.Deck[i] = -1) {
+	User.Deck[i] = User.Hand[2];
+	User.Hand[2] = -1;
+	}
+	i++;
+	}
+	}
+	}
+	else if (clickedRegion2) {
+	while (User.Hand[1] != -1) {
+	int i = 0;
+	if (User.Deck[i] = -1) {
+	User.Deck[i] = User.Hand[1];
+	User.Hand[1] = -1;
+	}
+	i++;
+	}
+	if (clickedRegion3) {
+	while (User.Hand[2] != -1) {
+	int i = 0;
+	if (User.Deck[i] = -1) {
+	User.Deck[i] = User.Hand[2];
+	User.Hand[2] = -1;
+	}
+	i++;
+	}
+	}
+	}
+	else if (clickedRegion3) {
+	while (User.Hand[2] != -1) {
+	int i = 0;
+	if (User.Deck[i] = -1) {
+	User.Deck[i] = User.Hand[2];
+	User.Hand[2] = -1;
+	}
+	i++;
+	}
+	}
+	for (int i = 0; i < 3; i++) {
+	if (User.Hand[i] == -1) {
+	location = rand() % deckSize;
+	User.Hand[i] = User.Deck[location];
+	User.isDrawn(location);
+	}
+	}
 	}
 	*/
 	//mulligan for computer (opponent)
@@ -748,18 +871,386 @@ void turn() {
 		}
 	}
 }
-void renderMinion(int ID, UserBoard minion1, OpponentBoard minion2) {
-	if (minion1.isInPlay) {
-
-	}
-	else if (minion2.isInPlay) {
-
-	}
-}
 void renderCard(int ID, int x, int y) {//starts at the top left
-	
+	if ((ID >= 1 && ID <= 39) || (ID >= 67 && ID <= 72) || (ID >= 74 && ID <= 81) || (ID >= 83 && ID <= 84)) {
+		drawMinionCardback(x, y);
+		putMinionStuff(ID, x, y);
+	}
+	else if ((ID >= 40 && ID <= 65) || ID == 66 || ID == 73 || ID == 82) {
+		drawSpellCardback(x, y);
+		putSpellStuff(ID, x, y);
+	}
 }
-void attackHero(Player hero, UserBoard minion1, OpponentBoard minion2) {
+void putMinionStuff(int ID, int x, int y) {
+	settextjustify(1, 1);
+	setcolor(WHITE);
+	drawImage(ID, x, y);
+	int amountAdded = 0;
+	int count = 0;
+	int len;
+	int descYAdjust;
+	string descHolder[16];
+	string nam = setName(ID);
+	const char* name = nam.c_str();
+	string desc = setAbilityText(ID);
+	const char* description = desc.c_str();
+	int mana = setManaCost(ID);
+	string mana2 = to_string(mana);
+	const char* manaCost = mana2.c_str();
+	int att = setAttack(ID);
+	string att2 = to_string(att);
+	const char* attack = att2.c_str();
+	int def = setDefense(ID);
+	string def2 = to_string(def);
+	const char* defense = def2.c_str();
+	outtextxy(x + cardNameOffsetX, y + cardNameOffsetY, name);
+	outtextxy(x + cardManaOffsetX, y + cardManaOffsetY, manaCost);
+	outtextxy(x + cardAttackOffsetX, y + cardAttackOffsetY, attack);
+	outtextxy(x + cardDefenseOffsetX, y + cardDefenseOffsetY, defense);
+	if (desc.length() <= 16) {
+		outtextxy(x + cardDescriptionOffsetX, y + cardDescriptionOffsetY, description);
+	}
+	else {
+		len = desc.length();
+		while (!(amountAdded == len)) {
+			if (desc.length() >= 16) {
+				for (int i = 0; i < desc.length(); i++) {
+					if (desc[15 - i] == ' ') {
+						descHolder[count] = desc.substr(0, 16 - i);
+						amountAdded += descHolder[count].length();
+						desc = desc.substr(16 - i, desc.length() - (16 - i));
+						count++;
+						i = desc.length();
+					}
+				}
+			}
+			else {
+				descHolder[count] = desc;
+				amountAdded += descHolder[count].length();
+				count++;
+			}
+		}
+		if (count % 2 == 1) {
+			descYAdjust = (count - 1) / 2 * 11;//11 is text height
+		}
+		else {
+			descYAdjust = (count / 2 - 1) * 11 + 6;//6 is approx half text height
+		}
+		for (int i = 0; i < count; i++) {
+			description = descHolder[i].c_str();
+			outtextxy(x + cardDescriptionOffsetX, y + cardDescriptionOffsetY - descYAdjust + 11 * i, description);
+		}
+	}
+}
+void putSpellStuff(int ID, int x, int y) {
+	settextjustify(1, 1);
+	drawImage(ID, x , y);
+	int amountAdded = 0;
+	int count = 0;
+	int len;
+	int descYAdjust;
+	string descHolder[16];
+	string nam = setName(ID);
+	const char* name = nam.c_str();
+	string desc = setAbilityText(ID);
+	const char* description = desc.c_str();
+	int mana = setManaCost(ID);
+	string mana2 = to_string(mana);
+	const char* manaCost = mana2.c_str();
+	outtextxy(x + cardNameOffsetX, y + cardNameOffsetY, name);
+	outtextxy(x + cardManaOffsetX, y + cardManaOffsetY, manaCost);
+	if (desc.length() <= 16) {
+		outtextxy(x + cardDescriptionOffsetX, y + cardDescriptionOffsetY, description);
+	}
+	else {
+		len = desc.length();
+		while (!(amountAdded == len)) {
+			if (desc.length() >= 16) {
+				for (int i = 0; i < desc.length(); i++) {
+					if (desc[15 - i] == ' ') {
+						descHolder[count] = desc.substr(0, 16 - i);
+						amountAdded += descHolder[count].length();
+						desc = desc.substr(16 - i, desc.length() - (16 - i));
+						count++;
+						i = desc.length();
+					}
+				}
+			}
+			else {
+				descHolder[count] = desc;
+				amountAdded += descHolder[count].length();
+				count++;
+			}
+		}
+		if (count % 2 == 1) {
+			descYAdjust = (count - 1) / 2 * 11;//11 is text height
+		}
+		else {
+			descYAdjust = (count / 2 - 1) * 11 + 6;//6 is approx half text height
+		}
+		for (int i = 0; i < count; i++) {
+			description = descHolder[i].c_str();
+			outtextxy(x + cardDescriptionOffsetX, y + cardDescriptionOffsetY - descYAdjust + 11 * i, description);
+		}
+	}
+}
+void drawImage(int ID, int x, int y) {
+	switch (ID) {
+	case 1:
+		drawMinion(Mini_Goomba, x, y);
+		break;
+	case 2:
+		drawMinion(Block, x, y);
+		break;
+	case 3:
+		drawMinion(Goomba, x, y);
+		break;
+	case 4:
+		drawMinion(Shy_Guy, x, y);
+		break;
+	case 5:
+		drawMinion(Toad, x, y);
+		break;
+	case 6:
+		drawMinion(Bill_Blaster, x, y);
+		break;
+	case 7:
+		drawMinion(Fuzzy, x, y);
+		break;
+	case 8:
+		drawMinion(Luma, x, y);
+		break;
+	case 9:
+		drawMinion(Rocky_Wench, x, y);
+		break;
+	case 10:
+		drawMinion(Cheep_Cheep, x, y);
+		break;
+	case 11:
+		drawMinion(Green_Koopa, x, y);
+		break;
+	case 12:
+		drawMinion(Para_Goomba, x, y);
+		break;
+	case 13:
+		drawMinion(Pipe_Pirahna_Plant, x, y);
+		break;
+	case 14:
+		drawMinion(Toadsworth, x, y);
+		break;
+	case 15:
+		drawMinion(Yoshi_Egg, x, y);
+		break;
+	case 16:
+		drawMinion(Boo, x, y);
+		break;
+	case 17:
+		drawMinion(Bowser_Jr, x, y);
+		break;
+	case 18:
+		drawMinion(Bowser_Statue, x, y);
+		break;
+	case 19:
+		drawMinion(Koopatrol, x, y);
+		break;
+	case 20:
+		drawMinion(Magikoopa, x, y);
+		break;
+	case 21:
+		drawMinion(Pokey, x, y);
+		break;
+	case 22:
+		drawMinion(Red_Koopa, x, y);
+		break;
+	case 23:
+		drawMinion(Wiggler, x, y);
+		break;
+	case 24:
+		drawMinion(Boomarang_Bro, x, y);
+		break;
+	case 25:
+		drawMinion(Captain_Toad, x, y);
+		break;
+	case 26:
+		drawMinion(Dry_Bones, x, y);
+		break;
+	case 27:
+		drawMinion(Fawful, x, y);
+		break;
+	case 28:
+		drawMinion(Goomba_Tower, x, y);
+		break;
+	case 29:
+		drawMinion(Hammer_Bro, x, y);
+		break;
+	case 30:
+		drawMinion(Lakitu, x, y);
+		break;
+	case 31:
+		drawMinion(Sledge_Bro, x, y);
+		break;
+	case 32:
+		drawMinion(Toadette, x, y);
+		break;
+	case 33:
+		drawMinion(Cataquak, x, y);
+		break;
+	case 34:
+		drawMinion(FireBro, x, y);
+		break;
+	case 35:
+		drawMinion(Antasma, x, y);
+		break;
+	case 36:
+		drawMinion(Goomba_King, x, y);
+		break;
+	case 37:
+		drawMinion(Dry_Bowser, x, y);
+		break;
+	case 38:
+		drawMinion(Honey_Queen, x, y);
+		break;
+	case 39:
+		drawMinion(King_Boo, x, y);
+		break;
+	case 40:
+		drawSpell(Fire_Flower, x, y);
+		break;
+	case 41:
+		drawSpell(Hammer, x, y);
+		break;
+	case 42:
+		drawSpell(Super_Mushroom, x, y);
+		break;
+	case 43:
+		drawSpell(OneUp, x, y);
+		break;
+	case 44:
+		drawSpell(Fused_Bombomb, x, y);
+		break;
+	case 45:
+		drawSpell(Lightning, x, y);
+		break;
+	case 46:
+		drawSpell(Marios_Cap, x, y);
+		break;
+	case 47:
+		drawSpell(Super_Star, x, y);
+		break;
+	case 48:
+		drawSpell(Whomp_Plomp, x, y);
+		break;
+	case 49:
+		drawSpell(Castle, x, y);
+		break;
+	case 50:
+		drawSpell(Dr_Mario_Pills, x, y);
+		break;
+	case 51:
+		drawSpell(FLUDD, x, y);
+		break;
+	case 52:
+		drawSpell(Metal_Cap, x, y);
+		break;
+	case 53:
+		drawSpell(POW_Block, x, y);
+		break;
+	case 54:
+		drawSpell(Warios_Bike, x, y);
+		break;
+	case 55:
+		drawSpell(Question_Block, x, y);
+		break;
+	case 56:
+		drawSpell(Damsel_in_Distress, x, y);
+		break;
+	case 57:
+		drawSpell(Thwomp_Stomp, x, y);
+		break;
+	case 58:
+		drawSpell(Blue_Shell, x, y);
+		break;
+	case 59:
+		drawSpell(Fuzzy_Maddness, x, y);
+		break;
+	case 60:
+		drawSpell(Gotta_Go_Fast, x, y);
+		break;
+	case 61:
+		drawSpell(Haunted_Mansion, x, y);
+		break;
+	case 62:
+		drawSpell(Koopalings_Mischief, x, y);
+		break;
+	case 63:
+		drawSpell(Mega_Mushroom, x, y);
+		break;
+	case 64:
+		drawSpell(LavaPool, x, y);
+		break;
+	case 65:
+		drawSpell(Wassup_Bro, x, y);
+		break;
+	case 66:
+		drawToken(Coin, x, y);
+		break;
+	case 67:
+		drawToken(Ball, x, y);
+		break;
+	case 68:
+		drawToken(Bat, x, y);
+		break;
+	case 69:
+		drawToken(Bullet_Bill, x, y);
+		break;
+	case 70:
+		drawToken(Lava_Bubble, x, y);
+		break;
+	case 71:
+		drawToken(Ring, x, y);
+		break;
+	case 72:
+		drawToken(Spiny, x, y);
+		break;
+	case 73:
+		drawToken(Green_Shell, x, y);
+		break;
+	case 74:
+		drawToken(Iggy, x, y);
+		break;
+	case 75:
+		drawToken(Larry, x, y);
+		break;
+	case 76:
+		drawToken(Lemmy, x, y);
+		break;
+	case 77:
+		drawToken(Ludwig_Von_Koopa, x, y);
+		break;
+	case 78:
+		drawToken(Morton, x, y);
+		break;
+	case 79:
+		drawToken(Roy, x, y);
+		break;
+	case 80:
+		drawToken(War_Toad, x, y);
+		break;
+	case 81:
+		drawToken(Wendy, x, y);
+		break;
+	case 82:
+		drawToken(Red_Shell, x, y);
+		break;
+	case 83:
+		drawToken(Sonic, x, y);
+		break;
+	case 84:
+		drawToken(Yoshi, x, y);
+		break;
+	}
+}
+void attackHero(Player hero, UserBoard minion1, OpponentBoard minion2) {// taunt, prob move to struct
 	if (minion1.isAttacking) {
 		hero.health -= minion1.attack;
 	}
@@ -767,14 +1258,14 @@ void attackHero(Player hero, UserBoard minion1, OpponentBoard minion2) {
 		hero.health -= minion2.attack;
 	}
 }
-void attackMinion(UserBoard minion1, OpponentBoard minion2) {
+void attackMinion(UserBoard minion1, OpponentBoard minion2) {//taunt, prob move to struct
 	//hero attack is 0
 	if (minion1.isAttacking) {
 		minion1.setDefense(minion1.defense - minion2.attack);
 		minion2.setDefense(minion2.defense - minion1.attack);
 		minion1.setIsAttacking(false);
 	}
-	else if(minion2.isAttacking) {
+	else if (minion2.isAttacking) {
 		minion1.setDefense(minion1.defense - minion2.attack);
 		minion2.setDefense(minion2.defense - minion1.attack);
 		minion2.setIsAttacking(false);
