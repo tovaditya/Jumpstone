@@ -32,7 +32,6 @@ string setAbilityText(int ID);
 void main() {
 	srand((unsigned int)time(NULL));
 	gr_Start(GrDriver, GrMode, ErrorCode);
-	cout << textheight("chicken") << endl;
 	renderCard();
 	system("pause");
 	return;
@@ -87,7 +86,7 @@ string setAbilityText(int ID) {
 		"Spiky 1 When this dies, summon a copy of this which has - 1 / -1",
 		"When this dies, put a Red Shell into your hand",
 		"If this unit takes damage, gain 4 attack and Double Jump.",
-		"Deal 1 damage to two random minions at the end of your turn",
+		"Deal 1 damage to two random enemy minions at the end of your turn",
 		"Summon 2 War Toads",
 		"When this dies, summon a Dry Bones",
 		"Take control of an enemy minion that has 2 or less attack",
@@ -152,7 +151,6 @@ string setAbilityText(int ID) {
 	return abText[ID - 1];
 }
 void renderCard() {
-	
 	int ID;
 	bool shownCard[84];
 	int count = 0;
@@ -181,7 +179,7 @@ void renderCard() {
 					putMinionStuff(ID, x, y);
 				}
 				else if ((ID >= 40 && ID <= 65) || ID == 66 || ID == 73 || ID == 82) {
-					drawSpellCardBack(x, y);
+					drawSpellCardback(x, y);
 					putSpellStuff(ID, x, y);
 				}
 				shownCard[ID - 1] = true;
