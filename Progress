@@ -13,6 +13,8 @@ Jumpstone: Hearthstone with Mario Characters
 #include <cmath>
 #include "Pixel.h"
 #include "Cardback.h"
+#include "VirtualKeys.h"
+#include <thread>
 struct Player;
 struct UserBoard;
 struct OpponentBoard;
@@ -28,6 +30,7 @@ const int cardAttackOffsetY = 220;
 const int cardDefenseOffsetX = 168;
 const int cardDefenseOffsetY = 220;
 const int cardOffset = 228;
+bool leftClick = false;
 #pragma region function prototypes
 void gr_Start(int &GrDriver, int&GrMode, int&ErrorCode);
 string setName(int ID);
@@ -46,7 +49,18 @@ void renderCard(int ID, int x, int y);
 void drawImage(int ID, int x, int y);
 void putMinionStuff(int ID, int x, int y);
 void putSpellStuff(int ID, int x, int y);
+bool MOUSE(int VirtualKey);
+void matchStart();
+void gameStart();
+void KEY_LISTENER();
 #pragma endregion
+INPUT_RECORD irInBuf;
+struct PASS {
+
+	int VirtualKey;
+	POINT p;
+	bool press;
+}global;
 struct UserBoard {
 	int ID;
 	int attack;
@@ -61,54 +75,10 @@ struct UserBoard {
 	bool canAttack = false;
 	bool hasTaunt = false;
 	bool hasDoubleJump = false;
+	bool isInvincible = false;
+	bool enrage = false;
 	int spikyLevel = 0;
 	string abilityText;
-	void triggerAbility() {
-	    if(ID == 6){//triggers at end of turn
-	        initiateMinion(69, User);
-	    }
-        else if(ID == 7){//triggers when minion attacks
-            if(maxDefense - defense >= 3){
-                defense += 3;
-            }
-            else{
-                defense = maxDefense;
-            }
-        }
-        else if(ID == 11){//triggers when minion dies
-            if(User.cardsInHand(User.Hand) == 7){
-            }
-            else{
-                User.Hand[User.cardsInHand(User.Hand)] = 73;
-                User.drawHand();
-            }
-        }
-        
-	}
-	void activateAbility() {//ones not listed don't have abilities or are triggers
-		if (ID == 2) {
-			hasTaunt = true;
-		}
-		else if (ID == 4) {
-			canAttack = true;
-		} 
-		else if (ID == 8) {
-			takeCard(User);
-		}
-		else if (ID == 9) {
-			// find target by deciding which region player clicked, then deal 1 dmg to it
-		}
-		else if (ID == 12){
-		    hasDoubleJump = true;
-		}
-		else if(ID == 13){
-		    hasTaunt = true;
-		    spikyLevel = 2;
-		}
-		else if(ID == 14){
-		    initiateMinion(5, User);
-		}
-	}
 	void setAbilityText(string abilityText) {
 		this->abilityText = abilityText;
 	}
@@ -139,6 +109,17 @@ struct UserBoard {
 	}
 	void renderMinion() {
 		drawImage(ID, xPos, yPos);
+	}
+	void drawStats() {
+		setcolor(WHITE);
+		string attack1 = to_string(attack);
+		const char* attack2 = attack1.c_str();
+		settextjustify(0, 2);
+		outtextxy(xPos, yPos + 100, attack2);
+		string defense1 = to_string(defense);
+		const char* defense2 = defense1.c_str();
+		settextjustify(2, 2);
+		outtextxy(xPos + 192, yPos + 100, defense2);
 	}
 }uC1, uC2, uC3, uC4, uC5, uC6, uC7;
 struct OpponentBoard {
@@ -185,11 +166,23 @@ struct OpponentBoard {
 	void renderMinion() {
 		drawImage(ID, xPos, yPos);
 	}
+	void drawStats() {
+		setcolor(WHITE);
+		string attack1 = to_string(attack);
+		const char* attack2 = attack1.c_str();
+		settextjustify(0, 2);
+		outtextxy(xPos, yPos + 100, attack2);
+		string defense1 = to_string(defense);
+		const char* defense2 = defense1.c_str();
+		settextjustify(2, 2);
+		outtextxy(xPos + 192, yPos + 100, defense2);
+	}
 }oC1, oC2, oC3, oC4, oC5, oC6, oC7;
 struct Player {
 	bool isUser;
 	bool isOpponent;
 	bool boardFull = false;
+	int attack = 0;
 	int health = 30;
 	int Deck[30];
 	int Hand[7];
@@ -199,19 +192,96 @@ struct Player {
 	int mana = 0;
 	int manaThisTurn = 0;
 	int fatigueTurn = 0;
-	void drawHand(){
-	    int handSize = sizeof(Hand) / sizeof(Hand[0]);
-	    for(int i = 0; i < handSize; i ++){
-	        setcolor(WHITE);
-	        if(isUser){
-	            bar(36 + cardOffset * i, 738, 36 + cardOffset * i - 192, 738 + 246);
-	        }
-	    }
-	    for(int i = 0; i < cardsInHand(Hand); i ++){
-	        if(isUser){
-	            renderCard(Hand[i], 36 + cardOffset * i, 738);
-	        }
-	    }
+	int numMinions;
+	void drawStats() {
+		settextjustify(1, 1);
+		setcolor(WHITE);
+		if (isUser) {
+			if (attack > 0) {
+				string attack1 = to_string(attack);
+				const char* attack2 = attack1.c_str();
+				outtextxy(922, 734, attack2);
+			}
+			string health1 = to_string(health);
+			const char* health2 = health1.c_str();
+			outtextxy(938, 734, health2);
+		}
+		else if (isOpponent) {
+			if (attack > 0) {
+				string attack1 = to_string(attack);
+				const char* attack2 = attack1.c_str();
+				outtextxy(922, 296, attack2);
+			}
+			string health1 = to_string(health);
+			const char* health2 = health1.c_str();
+			outtextxy(938, 296, health2);
+		}
+	}
+	void findNumMinions() {
+		if (isUser) {
+			int count = 0;
+			if (uC1.isInPlay) {
+				count++;
+			}
+			if (uC2.isInPlay) {
+				count++;
+			}
+			if (uC3.isInPlay) {
+				count++;
+			}
+			if (uC4.isInPlay) {
+				count++;
+			}
+			if (uC5.isInPlay) {
+				count++;
+			}
+			if (uC6.isInPlay) {
+				count++;
+			}
+			if (uC7.isInPlay) {
+				count++;
+			}
+			numMinions = count;
+		}
+		else if (isOpponent) {
+			int count = 0;
+			if (oC1.isInPlay) {
+				count++;
+			}
+			if (oC2.isInPlay) {
+				count++;
+			}
+			if (oC3.isInPlay) {
+				count++;
+			}
+			if (oC4.isInPlay) {
+				count++;
+			}
+			if (oC5.isInPlay) {
+				count++;
+			}
+			if (oC6.isInPlay) {
+				count++;
+			}
+			if (oC7.isInPlay) {
+				count++;
+			}
+			numMinions = count;
+		}
+	}
+	void drawHand() {
+		int handSize = sizeof(Hand) / sizeof(Hand[0]);
+		for (int i = 0; i < handSize; i++) {
+			setcolor(WHITE);
+			if (isUser) {
+				bar(36 + cardOffset * i, 738, 36 + cardOffset * i - 192, 738 + 246);
+			}
+		}
+		for (int i = 0; i < cardsInHand(Hand); i++) {
+			if (isUser) {
+				renderCard(Hand[i], 36 + cardOffset * i, 738);
+			}
+		}
 	}
 	void setMana(int mana) {
 		this->mana = mana;
@@ -299,13 +369,16 @@ struct Player {
 void main() {
 	srand((unsigned int)time(NULL));
 	gr_Start(GrDriver, GrMode, ErrorCode);
-	drawBoard();
+	thread g(gameStart);
+	thread k(KEY_LISTENER);
+	g.join();
+	k.join();
 	system("pause");
 	return;
 }
 void drawBoard() {
 	cleardevice();
-	
+
 	//rect 1: full rectangle
 	int top1 = 0;
 	int left1 = 0;
@@ -332,7 +405,7 @@ void drawBoard() {
 	ellipse(X, Y, 0, 360, Xr, Yr);
 
 	fillellipse(X, Y, Xr, Yr);
-	
+
 	setcolor(0);
 	// add asthetics to rect 2
 
@@ -455,12 +528,12 @@ int setAttack(int ID) {
 	return attackVals[ID - 1];
 }
 int setDefense(int ID) {
-	int defenseVals[84] = { 1, 4, 2, 2, 3, 5, 2, 2, 2, 2, 2, 4, 5, 3, 3, 3, 3, 7, 5, 4, 3, 4, 5, 5, 4, 1, 4, 5, 5, 5, 7, 5, 3, 5, 7, 6, 15, 8, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	int defenseVals[84] = { 1, 4, 2, 2, 3, 5, 2, 2, 2, 3, 2, 4, 5, 3, 3, 3, 3, 7, 5, 4, 3, 4, 5, 5, 4, 1, 4, 5, 5, 5, 7, 5, 3, 5, 7, 6, 15, 8, 4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,	1, 1, 1, 1, 1, 1, -1, 2, 3, 2, 2, 3, 2, 1, 3, -1, 2, 4 };
 	return defenseVals[ID - 1];
 }
 int setManaCost(int ID) {
-	int costVals[84] = { 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 7, 7, 8, 8, 8, 1, 1, 2, 2, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5,
+	int costVals[84] = { 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 7, 7, 8, 8, 8, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5,
 		6, 6, 6, 6, 8, 10, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 4, 4 };
 	return costVals[ID - 1];
 }
@@ -478,18 +551,18 @@ string setAbilityText(int ID) {
 		"",
 		"When this dies, put a green shell to your hand",
 		"Double Jump",
-		"Taunt, Spiky 2"
-		"Summon a Toad"
-		"When this dies, summon a Yoshi"
+		"Taunt, Spiky 2",
+		"Summon a Toad",
+		"When this dies, summon a Yoshi",
 		"This card has Invincible the turn it is played",
 		"Summons 1 random Koopaling",
-		"Taunt Can't attack. At the end of your turn, deal 2 damage to a random enemy."
+		"Taunt Can't attack. At the end of your turn, deal 2 damage to a random enemy.",
 		"Taunt When this dies, put a green shell to your hand",
 		"Deal 5 damage randomly accross all enemies",
 		"Spiky 1 When this dies, summon a copy of this which has - 1 / -1",
 		"When this dies, put a Red Shell into your hand",
 		"If this unit takes damage, gain 4 attack and Double Jump.",
-		"Deal 1 damage to two random minions at the end of your turn",
+		"Deal 1 damage to two random enemy minions at the end of your turn",
 		"Summon 2 War Toads",
 		"When this dies, summon a Dry Bones",
 		"Take control of an enemy minion that has 2 or less attack",
@@ -497,19 +570,19 @@ string setAbilityText(int ID) {
 		"Deal 2 damage",
 		"Each turn, summon a Spiny",
 		"Deal 5 damage.You can only play this card if you have played all Bros.",
-		"Restore 5 Health"
+		"Restore 5 Health",
 		"Taunt Return a minion to its owner's hand",
 		"Deal 3 damage",
 		"Whenever this card takes damage, summon a bat",
 		"Add 2 / 2 to every Goomba on the board",
-		"Draw this card when Lava Pool is played.When played, replace your character with dry bowser.Summon two random Koopalings",
+		"Draw this card when Lava Pool is played. When played, replace your character with dry bowser. Summon two random Koopalings",
 		"Heal all characters to full health",
 		"Take control of a enemy minion",
 		"Give unit + 2 attack",
 		"Deal 2 damage",
 		"Give a unit + 3 health",
-		"Equip to a minion.When it dies, bring it back with half health",
-		"Select a character.Deal 8 damage to it next turn.",
+		"Equip to a minion. When it dies, bring it back with half health",
+		"Select a character. Deal 8 damage to it next turn.",
 		"Set all minions to 1 health",
 		"Give a minion \"Summon a Luma at the beginning of your turn.\"",
 		"Give a minion Invincible for this turn only",
@@ -528,7 +601,7 @@ string setAbilityText(int ID) {
 		"Summon Sonic",
 		"Return all minions to their owner's hand",
 		"Summons 3 random Koopalings",
-		"Give unit + 5 health, +7 attack",
+		"Give unit + 5 health, + 7 attack",
 		"Destroy all minions",
 		"Summon 3 Bros.that have died this game",
 		"Give 1 more Mana this turn only",
@@ -567,6 +640,7 @@ void initiateMinion(int ID, Player player) {
 			uC1.xPos = 36 + cardOffset * 3;
 			uC1.createBorder();
 			uC1.renderMinion();
+			uC1.drawStats();
 			player.boardFull = false;
 		}
 		else if (!uC2.isInPlay) {
@@ -578,6 +652,7 @@ void initiateMinion(int ID, Player player) {
 			uC2.xPos = 36 + cardOffset * 2;
 			uC2.createBorder();
 			uC2.renderMinion();
+			uC2.drawStats();
 			player.boardFull = false;
 		}
 		else if (!uC3.isInPlay) {
@@ -589,6 +664,7 @@ void initiateMinion(int ID, Player player) {
 			uC3.xPos = 36 + cardOffset * 4;
 			uC3.createBorder();
 			uC3.renderMinion();
+			uC3.drawStats();
 			player.boardFull = false;
 		}
 		else if (!uC4.isInPlay) {
@@ -600,6 +676,7 @@ void initiateMinion(int ID, Player player) {
 			uC4.xPos = 36 + cardOffset * 1;
 			uC4.createBorder();
 			uC4.renderMinion();
+			uC4.drawStats();
 			player.boardFull = false;
 		}
 		else if (!uC5.isInPlay) {
@@ -611,6 +688,7 @@ void initiateMinion(int ID, Player player) {
 			uC5.xPos = 36 + cardOffset * 5;
 			uC5.createBorder();
 			uC5.renderMinion();
+			uC5.drawStats();
 			player.boardFull = false;
 		}
 		else if (!uC6.isInPlay) {
@@ -622,6 +700,7 @@ void initiateMinion(int ID, Player player) {
 			uC6.xPos = 36 + cardOffset * 0;
 			uC6.createBorder();
 			uC6.renderMinion();
+			uC6.drawStats();
 			player.boardFull = false;
 		}
 		else if (!uC7.isInPlay) {
@@ -633,6 +712,7 @@ void initiateMinion(int ID, Player player) {
 			uC7.xPos = 36 + cardOffset * 6;
 			uC7.createBorder();
 			uC7.renderMinion();
+			uC7.drawStats();
 			player.boardFull = true;
 		}
 		else {
@@ -649,6 +729,7 @@ void initiateMinion(int ID, Player player) {
 			oC1.xPos = 36 + cardOffset * 3;
 			oC1.createBorder();
 			oC1.renderMinion();
+			oC1.drawStats();
 			player.boardFull = false;
 		}
 		else if (!oC2.isInPlay) {
@@ -660,6 +741,7 @@ void initiateMinion(int ID, Player player) {
 			oC2.xPos = 36 + cardOffset * 2;
 			oC2.createBorder();
 			oC3.renderMinion();
+			oC2.drawStats();
 			player.boardFull = false;
 		}
 		else if (!oC3.isInPlay) {
@@ -671,18 +753,20 @@ void initiateMinion(int ID, Player player) {
 			oC3.xPos = 36 + cardOffset * 4;
 			oC3.createBorder();
 			oC3.renderMinion();
+			oC3.drawStats();
 			player.boardFull = false;
 		}
 		else if (!oC4.isInPlay) {
 			oC4.setID(ID);
 			oC4.setAttack(setAttack(ID));
 			oC4.setDefense(setDefense(ID));
-			oC1.setAbilityText(setAbilityText(ID));
+			oC4.setAbilityText(setAbilityText(ID));
 			oC4.setAbilityText(setAbilityText(ID));
 			oC4.isInPlay = true;
 			oC4.xPos = 36 + cardOffset * 1;
 			oC4.createBorder();
 			oC4.renderMinion();
+			oC4.drawStats();
 			player.boardFull = false;
 		}
 		else if (!oC5.isInPlay) {
@@ -694,6 +778,7 @@ void initiateMinion(int ID, Player player) {
 			oC5.xPos = 36 + cardOffset * 5;
 			oC5.createBorder();
 			oC5.renderMinion();
+			oC5.drawStats();
 			player.boardFull = false;
 		}
 		else if (!oC6.isInPlay) {
@@ -705,6 +790,7 @@ void initiateMinion(int ID, Player player) {
 			oC6.xPos = 36 + cardOffset * 0;
 			oC6.createBorder();
 			oC6.renderMinion();
+			oC6.drawStats();
 			player.boardFull = false;
 		}
 		else if (!oC7.isInPlay) {
@@ -716,6 +802,7 @@ void initiateMinion(int ID, Player player) {
 			oC7.xPos = 36 + cardOffset * 6;
 			oC7.createBorder();
 			oC7.renderMinion();
+			oC7.drawStats();
 			player.boardFull = true;
 		}
 		else {
@@ -728,7 +815,7 @@ void playCard(int ID, Player player) {
 
 	}
 	else if ((ID >= 1 && ID <= 39) || (ID >= 67 && ID <= 72) || (ID >= 74 && ID <= 81) || (ID >= 83 && ID <= 84)) {
-		initiateMinion(ID, player);\
+		initiateMinion(ID, player); \
 	}
 	else if ((ID >= 40 && ID <= 65) || ID == 66 || ID == 73 || ID == 82) {
 		cast(ID, player);
@@ -761,7 +848,7 @@ void takeCard(Player player) {
 	player.drawHand();
 }
 void gameStart() {
-
+	matchStart();
 }
 void matchStart() {
 	User.isUser = true;
@@ -782,13 +869,19 @@ void decideFOS() {
 }
 void mulligan() {
 	//three cards each player, second player gets 2 coins
+	int top1 = 0;
+	int left1 = 0;
+	int right1 = 1919;
+	int bottom1 = 1017;
+	setcolor(WHITE);
+	bar(top1, left1, right1, bottom1);
 	decideFOS();
 	int location;
 	int deckSize = sizeof(User.Deck) / sizeof(User.Deck[0]);
-	bool clickedRegion1;
-	bool clickedRegion2;
-	bool clickedRegion3;
-	bool mDone;
+	bool clickedRegion1 = false;
+	bool clickedRegion2 = false;
+	bool clickedRegion3 = false;
+	bool mDone = false;
 	if (User.isF) {
 		for (int i = 0; i < 3; i++) {
 			location = rand() % deckSize;
@@ -811,90 +904,172 @@ void mulligan() {
 		}
 		User.Hand[3], User.Hand[4] = 66;
 	}
+	renderCard(User.Hand[0], getmaxx() / 2 - 98 - cardOffset, getmaxy() / 2 - 132);
+	renderCard(User.Hand[1], getmaxx() / 2 - 98, getmaxy() / 2 - 132);
+	renderCard(User.Hand[2], getmaxx() / 2 - 98 + cardOffset, getmaxy() / 2 - 132);
+	setcolor(BLUE);
+	fillellipse(getmaxx() / 2, 726, 62, 42);
+	setcolor(BLACK);
+	ellipse(getmaxx() / 2, 726, 0, 360, 62, 42);
+	settextjustify(1, 1);
+	setcolor(WHITE);
+	outtextxy(getmaxx() / 2, 726, "DONE");
 	//mulligan for user
-	/*
+	while (!mDone) {
+		if (global.press) {
+			if (leftClick) {
+				if ((global.p.x >= getmaxx() / 2 - 31 && global.p.x <= getmaxx() / 2 + 31) && (global.p.y >= 726 - 21 && global.p.y <= 726 + 21)) {
+					mDone = true;
+				}
+				else if ((global.p.x >= getmaxx() / 2 - 98 - cardOffset && global.p.x <= getmaxx() / 2 - 98 - cardOffset + 192)
+					&& (global.p.y >= getmaxy() / 2 - 132 && global.p.y <= getmaxy() / 2 - 132 + 264)) {
+					clickedRegion1 = !clickedRegion1;
+				}
+				else if ((global.p.x >= getmaxx() / 2 - 98 && global.p.x <= getmaxx() / 2 - 98 + 192)
+					&& (global.p.y >= getmaxy() / 2 - 132 && global.p.y <= getmaxy() / 2 - 132 + 264)) {
+					clickedRegion2 = !clickedRegion2;
+				}
+				else if ((global.p.x >= getmaxx() / 2 - 98 + cardOffset && global.p.x <= getmaxx() / 2 - 98 + cardOffset + 192)
+					&& (global.p.y >= getmaxy() / 2 - 132 && global.p.y <= getmaxy() / 2 - 132 + 264)) {
+					clickedRegion3 = !clickedRegion3;
+				}
+				leftClick = false;
+			}
+			global.press = false;
+		}
+	}
 	if (mDone) {
-	if (clickedRegion1) {
-	while (User.Hand[0] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[0];
-	User.Hand[0] = -1;
+		if (clickedRegion1) {
+			while (User.Hand[0] != -1) {
+				int i = 0;
+				if (User.Deck[i] = -1) {
+					User.Deck[i] = User.Hand[0];
+					User.Hand[0] = -1;
+				}
+				i++;
+			}
+			if (clickedRegion2) {
+				while (User.Hand[1] != -1) {
+					int i = 0;
+					if (User.Deck[i] = -1) {
+						User.Deck[i] = User.Hand[1];
+						User.Hand[1] = -1;
+					}
+				i++;
+				}
+				if (clickedRegion3) {
+					while (User.Hand[2] != -1) {
+						int i = 0;
+						if (User.Deck[i] = -1) {
+							User.Deck[i] = User.Hand[2];
+							User.Hand[2] = -1;
+						}
+						i++;
+					}
+				}
+			}
+			else if (clickedRegion3) {
+				while (User.Hand[2] != -1) {
+					int i = 0;
+					if (User.Deck[i] = -1) {
+						User.Deck[i] = User.Hand[2];
+						User.Hand[2] = -1;
+					}
+					i++;
+				}
+			}
+		}
+		else if (clickedRegion2) {
+			while (User.Hand[1] != -1) {
+				int i = 0;
+				if (User.Deck[i] = -1) {
+					User.Deck[i] = User.Hand[1];
+					User.Hand[1] = -1;
+				}
+				i++;
+			}
+			if (clickedRegion3) {
+				while (User.Hand[2] != -1) {
+					int i = 0;
+					if (User.Deck[i] = -1) {
+						User.Deck[i] = User.Hand[2];
+						User.Hand[2] = -1;
+					}
+					i++;
+				}
+			}
+		}
+		else if (clickedRegion3) {
+			while (User.Hand[2] != -1) {
+				int i = 0;
+				if (User.Deck[i] = -1) {
+					User.Deck[i] = User.Hand[2];
+					User.Hand[2] = -1;
+				}
+				i++;
+			}
+		}
+		for (int i = 0; i < 3; i++) {
+			if (User.Hand[i] == -1) {
+				location = rand() % deckSize;
+				User.Hand[i] = User.Deck[location];
+				User.isDrawn(location);
+			}
+		}
 	}
-	i++;
-	}
-	if (clickedRegion2) {
-	while (User.Hand[1] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[1];
-	User.Hand[1] = -1;
-	}
-	i++;
-	}
-	if (clickedRegion3) {
-	while (User.Hand[2] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[2];
-	User.Hand[2] = -1;
-	}
-	i++;
-	}
-	}
-	}
-	else if (clickedRegion3) {
-	while (User.Hand[2] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[2];
-	User.Hand[2] = -1;
-	}
-	i++;
-	}
-	}
-	}
-	else if (clickedRegion2) {
-	while (User.Hand[1] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[1];
-	User.Hand[1] = -1;
-	}
-	i++;
-	}
-	if (clickedRegion3) {
-	while (User.Hand[2] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[2];
-	User.Hand[2] = -1;
-	}
-	i++;
-	}
-	}
-	}
-	else if (clickedRegion3) {
-	while (User.Hand[2] != -1) {
-	int i = 0;
-	if (User.Deck[i] = -1) {
-	User.Deck[i] = User.Hand[2];
-	User.Hand[2] = -1;
-	}
-	i++;
-	}
-	}
-	for (int i = 0; i < 3; i++) {
-	if (User.Hand[i] == -1) {
-	location = rand() % deckSize;
-	User.Hand[i] = User.Deck[location];
-	User.isDrawn(location);
-	}
-	}
-	}
-	*/
 	User.drawHand();
 	//mulligan for computer (opponent)
+}
+bool MOUSE(int VirtualKey) {
+	if ((GetAsyncKeyState(VirtualKey) & 0x8000) != 0)
+	{
+		irInBuf.EventType = MOUSE_EVENT;
+		GetCursorPos(&global.p);
+		global.press = true;
+		
+		return true;
+	}
+	return false;
+}
+bool KEYBOARD(int VirtualKey) {
+	if ((GetAsyncKeyState(VirtualKey) & 0x8000) != 0)
+	{
+		irInBuf.EventType = KEY_EVENT;
+		global.press = true;
+		global.VirtualKey = VirtualKey;
+		return true;
+	}
+	return false;
+}
+void KEY_LISTENER() {
+	while (true) {
+		if (MOUSE(VK_LBUTTON)) {
+			POINT v;
+			GetCursorPos(&v);
+			
+		}
+		if (KEYBOARD(VK_1)) {
+
+		}
+		if (KEYBOARD(VK_2)) {
+
+		}
+		if (KEYBOARD(VK_3)) {
+
+		}
+		if (KEYBOARD(VK_4)) {
+
+		}
+		if (KEYBOARD(VK_5)) {
+
+		}
+		if (KEYBOARD(VK_6)) {
+
+		}
+		if (KEYBOARD(VK_7)) {
+
+		}
+	}
 }
 void turn() {
 	if (User.isF) {
@@ -928,6 +1103,154 @@ void renderCard(int ID, int x, int y) {//starts at the top left
 		putSpellStuff(ID, x, y);
 	}
 }
+/*
+void triggerAbility() {
+	//Requires trigger other than playing a card
+	if (ID == 6) {//triggers at end of turn
+		initiateMinion(69, User);
+	}
+	else if (ID == 7) {//triggers when minion attacks
+		if (maxDefense - defense >= 3) {
+			defense += 3;
+		}
+		else {
+			defense = maxDefense;
+		}
+	}
+	else if (ID == 11) {//triggers when minion dies
+		if (User.cardsInHand(User.Hand) == 7) {
+		}
+		else {
+			User.Hand[User.cardsInHand(User.Hand)] = 73;
+			User.drawHand();
+		}
+	}
+	else if (ID == 15) {
+		initiateMinion(84, User);
+	}
+	else if (ID == 18) {
+		// deal 2 damage to a random enemy
+	}
+	else if (ID == 19) {
+		if (User.cardsInHand(User.Hand) == 7) {
+		}
+		else {
+			User.Hand[User.cardsInHand(User.Hand)] = 73;
+			User.drawHand();
+		}
+	}
+	else if (ID == 21) {
+		// summon -1/-1 of itself on death
+	}
+	else if (ID == 22) {//triggers when minion dies
+		if (User.cardsInHand(User.Hand) == 7) {
+		}
+		else {
+			User.Hand[User.cardsInHand(User.Hand)] = 82;
+			User.drawHand();
+		}
+	}
+	else if (ID == 23) {
+		attack, maxAttack += 4;
+		hasDoubleJump = true;
+	}
+	else if (ID == 24) {
+		//deal 1 damage to two random enemy mininos at the end of your turn
+	}
+	else if (ID == 26) {
+		initiateMinion(26, User);
+	}
+	else if (ID == 28) {
+		// summon -2/-2 copy of itself on death
+	}
+	else if (ID == 30) {
+		//Each turn
+		initiateMinion(72, User);
+	}
+}
+void activateAbility() {//ones not listed don't have abilities or are triggers
+						//battlecry, attributes
+	if (ID == 2) {
+		hasTaunt = true;
+	}
+	else if (ID == 4) {
+		canAttack = true;
+	}
+	else if (ID == 8) {
+		takeCard(User);
+	}
+	else if (ID == 9) {
+		// find target by deciding which region player clicked, then deal 1 dmg to it
+	}
+	else if (ID == 12) {
+		hasDoubleJump = true;
+	}
+	else if (ID == 13) {
+		hasTaunt = true;
+		spikyLevel = 2;
+	}
+	else if (ID == 14) {
+		initiateMinion(5, User);
+	}
+	else if (ID == 16) {
+		isInvincible = true;
+	}
+	else if (ID == 17) {
+		int randKoop = (rand() % 7) + 1;
+		switch (randKoop) {
+		case 1:
+			initiateMinion(74, User);
+			break;
+		case 2:
+			initiateMinion(75, User);
+			break;
+		case 3:
+			initiateMinion(76, User);
+			break;
+		case 4:
+			initiateMinion(77, User);
+			break;
+		case 5:
+			initiateMinion(78, User);
+			break;
+		case 6:
+			initiateMinion(79, User);
+			break;
+		case 7:
+			initiateMinion(81, User);
+			break;
+		}
+	}
+	else if (ID == 18) {
+		hasTaunt = true;
+		// Cant attack
+	}
+	else if (ID == 19) {
+		hasTaunt = true;
+	}
+	else if (ID == 20) {
+		for (int i; i < 5; i++) {
+			// Deal 1 damage to random enemy
+		}
+	}
+	else if (ID == 21) {
+		spikyLevel = 1;
+	}
+	else if (ID == 23) {
+		enrage = true;
+	}
+	else if (ID == 25) {
+		initiateMinion(80, User);
+		initiateMinion(80, User);
+	}
+	else if (ID == 27) {
+		//Take control of a minion with 2 or less attack
+	}
+	else if (ID == 29) {
+		// Deal 2 damage
+	}
+}
+*/
 void putMinionStuff(int ID, int x, int y) {
 	settextjustify(1, 1);
 	setcolor(WHITE);
@@ -991,7 +1314,7 @@ void putMinionStuff(int ID, int x, int y) {
 }
 void putSpellStuff(int ID, int x, int y) {
 	settextjustify(1, 1);
-	drawImage(ID, x , y);
+	drawImage(ID, x, y);
 	int amountAdded = 0;
 	int count = 0;
 	int len;
@@ -1306,7 +1629,7 @@ void attackHero(Player hero, UserBoard minion1, OpponentBoard minion2) {// taunt
 	}
 }
 void attackMinion(UserBoard minion1, OpponentBoard minion2) {//taunt, prob move to struct
-	//hero attack is 0
+															 //hero attack is 0
 	if (minion1.isAttacking) {
 		minion1.setDefense(minion1.defense - minion2.attack);
 		minion2.setDefense(minion2.defense - minion1.attack);
