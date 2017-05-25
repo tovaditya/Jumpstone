@@ -133,6 +133,10 @@ struct OpponentBoard {
 	int turnActivated;
 	bool canAttack = false;
 	bool hasTaunt = false;
+	bool hasDoubleJump = false;
+	bool isInvincible = false;
+	bool enrage = false;
+	int spikyLevel = 0;
 	string abilityText;
 	int xPos;
 	int yPos = 419;
@@ -378,7 +382,6 @@ void main() {
 }
 void drawBoard() {
 	cleardevice();
-
 	//rect 1: full rectangle
 	int top1 = 0;
 	int left1 = 0;
@@ -845,7 +848,7 @@ void takeCard(Player player) {
 		}
 		player.isDrawn(location);
 	}
-	player.drawHand();
+	User.drawHand();
 }
 void gameStart() {
 	matchStart();
@@ -856,6 +859,8 @@ void matchStart() {
 	Opponent.createDeck();
 	User.createDeck();
 	mulligan();
+	drawBoard();
+	User.drawHand();
 }
 void decideFOS() {
 	User.isFirst();
@@ -904,9 +909,9 @@ void mulligan() {
 		}
 		User.Hand[3], User.Hand[4] = 66;
 	}
-	renderCard(User.Hand[0], getmaxx() / 2 - 98 - cardOffset, getmaxy() / 2 - 132);
-	renderCard(User.Hand[1], getmaxx() / 2 - 98, getmaxy() / 2 - 132);
-	renderCard(User.Hand[2], getmaxx() / 2 - 98 + cardOffset, getmaxy() / 2 - 132);
+	renderCard(User.Hand[0], getmaxx() / 2 - 96 - cardOffset, getmaxy() / 2 - 132);
+	renderCard(User.Hand[1], getmaxx() / 2 - 96, getmaxy() / 2 - 132);
+	renderCard(User.Hand[2], getmaxx() / 2 - 96 + cardOffset, getmaxy() / 2 - 132);
 	setcolor(BLUE);
 	fillellipse(getmaxx() / 2, 726, 62, 42);
 	setcolor(BLACK);
@@ -919,24 +924,24 @@ void mulligan() {
 		if (global.press) {
 			if (leftClick) {
 				if ((global.p.x >= getmaxx() / 2 - 31 && global.p.x <= getmaxx() / 2 + 31) && (global.p.y >= 726 - 21 && global.p.y <= 726 + 21)) {
-					mDone = true;
+					mDone = !mDone;
 				}
-				else if ((global.p.x >= getmaxx() / 2 - 98 - cardOffset && global.p.x <= getmaxx() / 2 - 98 - cardOffset + 192)
+				if ((global.p.x >= getmaxx() / 2 - 96 - cardOffset && global.p.x <= getmaxx() / 2 - 96 - cardOffset + 192)
 					&& (global.p.y >= getmaxy() / 2 - 132 && global.p.y <= getmaxy() / 2 - 132 + 264)) {
 					clickedRegion1 = !clickedRegion1;
 				}
-				else if ((global.p.x >= getmaxx() / 2 - 98 && global.p.x <= getmaxx() / 2 - 98 + 192)
+				if ((global.p.x >= getmaxx() / 2 - 96 && global.p.x <= getmaxx() / 2 - 96 + 192)
 					&& (global.p.y >= getmaxy() / 2 - 132 && global.p.y <= getmaxy() / 2 - 132 + 264)) {
 					clickedRegion2 = !clickedRegion2;
 				}
-				else if ((global.p.x >= getmaxx() / 2 - 98 + cardOffset && global.p.x <= getmaxx() / 2 - 98 + cardOffset + 192)
+				if ((global.p.x >= getmaxx() / 2 - 96 + cardOffset && global.p.x <= getmaxx() / 2 - 96 + cardOffset + 192)
 					&& (global.p.y >= getmaxy() / 2 - 132 && global.p.y <= getmaxy() / 2 - 132 + 264)) {
-					clickedRegion3 = !clickedRegion3;
+						clickedRegion3 = !clickedRegion3;
 				}
-				leftClick = false;
 			}
-			global.press = false;
+			leftClick = false;
 		}
+		global.press = false;
 	}
 	if (mDone) {
 		if (clickedRegion1) {
@@ -1012,12 +1017,12 @@ void mulligan() {
 		for (int i = 0; i < 3; i++) {
 			if (User.Hand[i] == -1) {
 				location = rand() % deckSize;
+
 				User.Hand[i] = User.Deck[location];
 				User.isDrawn(location);
 			}
 		}
 	}
-	User.drawHand();
 	//mulligan for computer (opponent)
 }
 bool MOUSE(int VirtualKey) {
@@ -1044,9 +1049,7 @@ bool KEYBOARD(int VirtualKey) {
 void KEY_LISTENER() {
 	while (true) {
 		if (MOUSE(VK_LBUTTON)) {
-			POINT v;
-			GetCursorPos(&v);
-			
+			leftClick = true;
 		}
 		if (KEYBOARD(VK_1)) {
 
